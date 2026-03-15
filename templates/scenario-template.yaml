@@ -1,0 +1,30 @@
+id: "SC-001"
+name: "Test Name"
+description: "What this test verifies"
+tags: ["tag1", "tag2"]
+variables:
+  url: "https://example.com"
+
+steps:
+  - step: 1
+    action: navigate
+    value: "{{url}}"
+    description: "Navigate to the application"
+
+  - step: 2
+    action: find_and_click
+    target:
+      text: "Button Text"
+    description: "Click the target button"
+
+  - step: 3
+    action: assert
+    assert_type: text_visible
+    expected:
+      - type: text_visible
+        value: "Expected text on screen"
+    description: "Verify expected result"
+
+expected_result:
+  - type: url_contains
+    value: "/expected-path"

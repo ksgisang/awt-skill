@@ -1,0 +1,28 @@
+{
+  "name": "awt",
+  "displayName": "AWT — AI-Powered E2E Testing",
+  "version": "1.0.0",
+  "description": "Self-healing DevQA loop: scan websites, generate YAML test scenarios with AI, execute with Playwright, auto-fix failures. Supports 4 AI providers, vision matching, pattern learning.",
+  "author": "AILoopLab",
+  "license": "AGPL-3.0",
+  "repository": "https://github.com/ksgisang/awt-skill",
+  "homepage": "https://ai-watch-tester.vercel.app",
+  "categories": ["testing", "devops", "automation"],
+  "tags": [
+    "e2e-testing", "ai-testing", "playwright", "self-healing", "devqa",
+    "yaml-scenarios", "vision-ai", "qa-automation", "web-testing", "regression-testing"
+  ],
+  "agents": [
+    "claude-code", "antigravity", "cursor", "codex", "gemini-cli",
+    "amp", "cline", "aider", "windsurf", "roo-code", "pearai"
+  ],
+  "skillFile": "../SKILL.md",
+  "triggers": {
+    "keywords": ["test", "E2E", "QA", "bug", "scenario", "web app", "playwright", "regression", "self-healing"],
+    "filePatterns": ["*.yaml", "*.yml", "aat.config.yaml", "scenarios/**"]
+  },
+  "requirements": {
+    "runtime": "python>=3.11",
+    "tools": ["aat-devqa", "playwright", "tesseract"]
+  }
+}

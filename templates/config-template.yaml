@@ -1,0 +1,25 @@
+project_name: "my-project"
+url: "https://mysite.com"
+
+ai:
+  provider: "claude"
+  model: "claude-sonnet-4-20250514"
+  temperature: 0.3
+
+engine:
+  type: "web"
+  browser: "chromium"
+  headless: false
+  viewport_width: 1280
+  viewport_height: 720
+
+matching:
+  confidence_threshold: 0.85
+  ocr_languages: ["eng"]
+  chain_order: ["learned", "template", "ocr", "feature"]
+
+humanizer:
+  enabled: true
+
+max_loops: 10
+approval_mode: "manual"

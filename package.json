@@ -1,0 +1,17 @@
+{
+  "name": "@ksgisang/awt-skill",
+  "version": "1.0.0",
+  "description": "AI-powered E2E testing skill with self-healing DevQA loop for Claude Code, Codex, Cursor, and 11+ AI coding tools",
+  "keywords": [
+    "agent-skill", "e2e-testing", "ai-testing", "playwright", "devqa",
+    "self-healing", "yaml-scenarios", "vision-ai", "claude-code", "codex", "cursor"
+  ],
+  "homepage": "https://github.com/ksgisang/awt-skill",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ksgisang/awt-skill.git"
+  },
+  "license": "AGPL-3.0",
+  "author": "AILoopLab <ksgisang@gmail.com>",
+  "files": ["SKILL.md", "references/", "templates/", "LICENSE", "README.md"]
+}
