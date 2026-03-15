@@ -61,6 +61,11 @@ After installation, the skill is available as `/awt` in Claude Code and auto-tri
 | Live screenshots | No | Screenshot only | **Yes (WebSocket stream)** |
 | Multi-language OCR | No | No | **Yes (10+ languages)** |
 | Offline support | No | No | **Yes (Ollama)** |
+| Cost tracking | No | No | **Yes (per-call logging + aat cost)** |
+| Source code analysis | No | No | **Yes (Skill-exclusive)** |
+| Scenario caching | No | No | **Yes (same spec = no re-call)** |
+| Browser test overlay | No | No | **Yes (live step progress)** |
+| Dependency ordering | No | No | **Yes (depends_on field)** |
 
 ### When to use each:
 - **webapp-testing** — Quick one-off Playwright scripts for simple page checks
@@ -92,6 +97,8 @@ AWT follows the [Agent Skills open standard](https://agentskills.io) and works w
 ```yaml
 id: "SC-001"
 name: "User Login"
+tags: ["auth", "login"]
+depends_on: ["SC-000"]
 steps:
   - step: 1
     action: navigate
@@ -148,6 +155,7 @@ Scan → Plan → Review → Execute → Heal
 |----------|--------|------|---------|
 | Claude (default) | Yes | Medium | No |
 | OpenAI (GPT-4o) | Yes | Higher | No |
+| Gemini (default: free) | Yes | Free tier | Yes |
 | DeepSeek | No | Low | No |
 | Ollama | No | Free | Yes |
 
@@ -168,6 +176,19 @@ awt-skill/
 ├── CONTRIBUTING.md
 └── package.json
 ```
+
+## Key CLI Commands
+
+| Command | Description |
+|---------|-------------|
+| `aat doctor` | Check environment (Python, Playwright, Tesseract, AI) |
+| `aat init` | Initialize project + AI setup + environment check |
+| `aat setup` | Configure AI provider and API key |
+| `aat generate` | AI-generate scenarios (with cost estimate + caching) |
+| `aat run` | Execute tests (browser overlay in headed mode) |
+| `aat loop` | Self-healing DevQA loop |
+| `aat cost` | View AI API usage costs |
+| `aat validate` | Validate YAML scenarios |
 
 ## Requirements
 

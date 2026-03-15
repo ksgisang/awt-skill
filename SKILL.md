@@ -15,6 +15,7 @@ AWT (AI Watch Tester) is an AI-powered DevQA loop orchestrator. It scans website
 - User mentions **bug detection**, **test automation**, or **UI testing**
 - User asks about **self-healing tests** or **auto-fix on test failure**
 - User wants to set up a **DevQA loop** (test → analyze → fix → retest)
+- E2E test failed and user wants to **find the root cause in source code** — trace from failed test to route/controller/component/query
 
 ## When NOT to Use This Skill
 
@@ -37,17 +38,22 @@ The loop repeats (up to 10 iterations by default) until all tests pass or the us
 
 ## Quick Start
 
+**Before running any AWT command, verify your environment with `aat doctor`.** It checks Python, Playwright, Tesseract, AI provider connection, and shows OS-specific install commands for missing dependencies.
+
 ```bash
-# 1. Initialize project
+# 0. Check environment (auto-runs during init, or run manually)
+aat doctor
+
+# 1. Initialize project (includes AI setup + environment check)
 aat init --name my-project --url https://mysite.com
+#    → Prompts: choose provider (Claude/OpenAI/Gemini/DeepSeek/Ollama) + enter API key
+#    → Gemini and Ollama have generous free tiers
+#    → API key stored locally only, auto-added to .gitignore
 
-# 2. Set AI provider API key (choose one)
-aat config set ai.provider claude
-export AAT_AI__API_KEY=sk-ant-...          # Claude
-# export AAT_AI__API_KEY=sk-...            # OpenAI
-# aat config set ai.provider ollama        # Ollama — no API key needed, free & offline
+# 2. Re-configure AI provider anytime
+aat setup
 
-# 3. Generate scenarios from a spec document
+# 3. Generate scenarios (shows cost estimate, asks confirmation, caches result)
 aat generate --from docs/spec.md
 
 # 4. Validate scenarios
@@ -59,7 +65,10 @@ aat run scenarios/
 # 6. Run DevQA loop (auto-heal on failure)
 aat loop scenarios/ --approval-mode manual
 
-# 7. Interactive guided mode (all steps in one command)
+# 7. View AI usage costs
+aat cost
+
+# 8. Interactive guided mode (all steps in one command)
 aat start
 ```
 
@@ -67,7 +76,9 @@ aat start
 
 | Command | Description |
 |---------|-------------|
-| `aat init` | Initialize project (`.aat/`, `scenarios/`, config) |
+| `aat doctor` | Check environment: Python, Playwright, Tesseract, AI connection |
+| `aat init` | Initialize project + AI setup + environment check |
+| `aat setup` | Re-configure AI provider and API key anytime |
 | `aat config show` | Display current configuration |
 | `aat config set <key> <value>` | Set config value (e.g., `ai.provider openai`) |
 | `aat validate <path>` | Validate YAML scenario files |
@@ -76,6 +87,7 @@ aat start
 | `aat analyze <file>` | AI-analyze a spec document |
 | `aat generate --from <file>` | Generate scenarios from spec |
 | `aat start` | Interactive guided mode |
+| `aat cost` | View AI API usage costs (daily/monthly) |
 | `aat dashboard` | Web UI with live screenshots |
 
 ### Key Options
@@ -92,6 +104,16 @@ aat loop scenarios/ \
 - `branch` — Git branch isolation (`aat/fix-001`), auto-commit, auto-retest
 - `auto` — Direct file modification + retest (fastest, riskiest)
 
+### Headed Mode Features
+
+When running tests with `headless: false` (default), AWT provides:
+- **Browser overlay** — real-time step progress bar at top of browser window (step name, pass/fail status, counter)
+- **slowMo** — each Playwright action paused by 100ms (default) so you can see what's happening
+  ```
+  aat run scenarios/ --slow-mo 200    # Slower for demos
+  aat run scenarios/ --slow-mo 0      # Disable slowMo
+  ```
+
 ## YAML Scenario Format
 
 ```yaml
@@ -99,6 +121,7 @@ id: "SC-001"
 name: "User Login"
 description: "Test login with valid credentials"
 tags: ["auth", "login"]
+depends_on: ["SC-000"]          # Run after SC-000 passes (optional)
 variables:
   url: "https://mysite.com"
 
@@ -169,7 +192,7 @@ project_name: "my-project"
 url: "https://mysite.com"
 
 ai:
-  provider: "claude"          # claude | openai | deepseek | ollama
+  provider: "claude"          # claude | openai | gemini | deepseek | ollama
   model: "claude-sonnet-4-20250514"
   temperature: 0.3
 
@@ -192,12 +215,79 @@ max_loops: 10
 approval_mode: "manual"
 ```
 
+## Source Code Root Cause Analysis (Skill-Exclusive)
+
+**This is the decisive advantage of using AWT as an Agent Skill** — unlike AWT Cloud, which can only see the browser, the skill runs inside your IDE where it has full access to your project source code.
+
+When an E2E test fails, DO NOT just report the test failure. Follow this procedure:
+
+### Step 1: Identify the failing behavior
+From the `aat run` output, extract: which step failed, the action (navigate, click, assert), the error message, and the expected vs actual result.
+
+### Step 2: Trace to source code
+Based on the failing URL/action, search the project codebase for the responsible code:
+
+```
+Failing URL: /api/login → search for route handlers
+  - Look for: routes/login, api/auth, controllers/auth, pages/login
+  - Frameworks: Next.js (app/api/), Express (router.post), FastAPI (@app.post), Django (urls.py)
+
+Failing assertion: "Welcome back" not visible → search for where that text is rendered
+  - Grep for the expected text in templates, components, or API responses
+
+Failing click: "Submit" button not found → search for the form component
+  - Look for: <button>, <input type="submit">, onClick handlers
+```
+
+### Step 3: Analyze root cause
+Read the identified source files and determine WHY the test failed:
+- **Route not defined** → missing endpoint
+- **Conditional rendering** → auth check failing, feature flag off
+- **API returns error** → DB query failing, validation error
+- **Wrong redirect** → incorrect router.push/redirect path
+- **Text mismatch** → i18n key wrong, hardcoded vs dynamic text
+
+### Step 4: Propose fix with code diff
+Show a concrete before/after code change:
+
+```
+File: src/app/api/login/route.ts
+Issue: Returns 401 instead of redirecting to /dashboard on success
+
+// BEFORE
+return NextResponse.json({ error: "Invalid" }, { status: 401 });
+
+// AFTER
+if (valid) {
+  return NextResponse.redirect(new URL("/dashboard", request.url));
+}
+return NextResponse.json({ error: "Invalid" }, { status: 401 });
+```
+
+### Step 5: Verify fix scope
+Check for side effects — does the fix break other tests? Search for other code that depends on the changed function/route.
+
+### Example: Complete failure analysis
+
+When user runs `aat run scenarios/` and Step 4 fails with "text 'Welcome back' not visible":
+
+1. **Read test output** — Step 4 assert failed on `/dashboard` page
+2. **Search codebase** — `Grep for "Welcome back"` → found in `src/components/Dashboard.tsx:42`
+3. **Read component** — Shows `{user?.name ? "Welcome back" : "Loading..."}`
+4. **Trace auth flow** — `useAuth()` hook → `src/lib/auth.ts` → session cookie not set after login
+5. **Find bug** — Login API at `src/app/api/login/route.ts` doesn't set `Set-Cookie` header
+6. **Propose fix** — Add `cookies().set("session", token)` to login route
+7. **Check impact** — Search for other routes using `cookies().get("session")` to verify compatibility
+
+**Key principle:** The AI agent (you) can read ANY file in the project. Use Grep, Glob, and Read tools aggressively to trace from failed test → UI component → API route → database query until you find the root cause.
+
 ## AI Providers
 
 | Provider | Vision | Structured Output | Cost | Offline |
 |----------|--------|-------------------|------|---------|
 | Claude | Yes | Yes | Medium | No |
 | OpenAI | Yes (GPT-4o) | Yes | Higher | No |
+| Gemini | Yes | Partial | Free tier | No |
 | DeepSeek | No | Partial | Low | No |
 | Ollama | No | No | Free | Yes |
 

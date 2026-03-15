@@ -30,6 +30,26 @@ Thank you for your interest in contributing!
 - **Templates** — New scenario templates for common patterns (auth, CRUD, e-commerce)
 - **Translations** — SKILL.md in other languages
 
+### New AI Provider Adapters — PRs Welcome!
+
+We actively welcome community contributions for new AI provider adapters. Currently supported: Claude, OpenAI, Gemini, DeepSeek, Ollama.
+
+**Wanted adapters:**
+- **Grok (xAI)** — OpenAI-compatible API at `api.x.ai`
+- **Mistral** — OpenAI-compatible API at `api.mistral.ai`
+- **Cohere** — Command R+
+- **Any OpenAI-compatible provider** — Usually 30 lines of code (see `deepseek.py` or `gemini.py` as examples)
+
+**How to add a new adapter:**
+1. Create `src/aat/adapters/your_provider.py` — inherit from `OpenAIAdapter`, override `__init__` and `_call_api`
+2. Register in `src/aat/adapters/__init__.py` — add to `ADAPTER_REGISTRY`
+3. Add pricing in `src/aat/core/cost.py` — add to `PRICING` dict
+4. Add connection test in `src/aat/core/connection.py`
+5. Add to `src/aat/cli/commands/setup_cmd.py` — `PROVIDERS` list
+6. Submit PR to [AI-Watch-Tester](https://github.com/ksgisang/AI-Watch-Tester)
+
+Most OpenAI-compatible providers need only ~30 lines (see `src/aat/adapters/gemini.py` as a minimal example).
+
 ### What NOT to Change
 
 - Don't add AWT core code here (that belongs in [AI-Watch-Tester](https://github.com/ksgisang/AI-Watch-Tester))
