@@ -399,6 +399,35 @@ target:
 
 **4. Skill Mode needs no AI API** — In Skill Mode, your AI coding tool creates scenarios directly. You don't need `aat generate` or an AI API key. Just write YAML and run `aat run --learn scenarios/`.
 
+**5. Dismiss popups first** — Popups, cookie banners, and modals can block tests. Add `press_key Escape` at the start of scenarios:
+```yaml
+- step: 1
+  action: press_key
+  value: "Escape"
+  description: "Dismiss any popup/modal"
+```
+
+**6. Flutter/Canvas SPA** — Flutter Web renders text on Canvas, not DOM. AWT auto-falls back to OCR for `text_visible` assertions. For input fields, use `click_at` + `type_text` instead of `find_and_type` (Flutter creates hidden invisible inputs):
+```yaml
+# Instead of find_and_type (fails on Flutter):
+- step: 2
+  action: click_at
+  value: "400,300"
+  description: "Click the email field"
+- step: 3
+  action: type_text
+  value: "user@example.com"
+  description: "Type email"
+```
+
+**7. Scroll shortcuts** — Use `"down"`, `"up"` instead of coordinates:
+```yaml
+- step: 2
+  action: scroll
+  value: "down"
+  description: "Scroll down"
+```
+
 ## AI Providers
 
 | Provider | Vision | Structured Output | Cost | Offline |
