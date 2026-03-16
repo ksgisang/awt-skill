@@ -327,7 +327,7 @@ When user runs `aat run scenarios/` and Step 4 fails with "text 'Welcome back' n
 
 **1. Real browser ≠ HTML source** — On i18n (multilingual) sites, the HTML source may show default-language text while the browser renders translated text. AWT tests in a real browser, so always write assertions based on **what the user actually sees on screen**, not what's in the HTML source.
 
-**2. One scenario per file** — AWT supports one scenario per YAML file. Multi-document YAML (`---` separator) is not supported. Create separate files: `SC-001_login.yaml`, `SC-002_dashboard.yaml`.
+**2. Multi-document YAML supported** — Put multiple scenarios in one file using `---` separator. AWT loads all documents from a single file. You can also use separate files if preferred.
 
 **3. Use selector + text together** — When both a CSS selector and OCR text are available, specify both in the target. If OCR fails (font rendering, contrast), the selector provides a fallback:
 ```yaml
