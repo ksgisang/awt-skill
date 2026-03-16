@@ -5,6 +5,8 @@
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](LICENSE)
 [![Agent Skills](https://img.shields.io/badge/Agent_Skills-Compatible-brightgreen.svg)](https://agentskills.io)
 
+> **Works without AI API** — write YAML scenarios manually and run `aat run`. No API key needed. AI coding tools make it easier, but are not required.
+
 ---
 
 ## What is AWT?
@@ -77,10 +79,10 @@ For manual installations: `cd ~/.claude/skills/awt && git pull`
 | Natural language → test | No | No | **Yes** |
 | Self-healing loop | No | No | **Yes (DevQA Loop)** |
 | Auto-fix on failure | No | No | **Yes (AI → PR)** |
-| Vision AI matching | No | No | **Yes (OpenCV + OCR)** |
+| Visual matching (OpenCV + OCR) | No | No | **Yes (OpenCV + OCR)** |
 | Pattern learning | No | No | **Yes (SQLite)** |
 | Server lifecycle mgmt | Yes | Yes | **Yes (aat dashboard)** |
-| Multiple AI providers | No | No | **Yes (4 providers)** |
+| Multiple AI providers | No | No | **Yes (5 providers)** |
 | Human-like interaction | No | No | **Yes (Bezier mouse)** |
 | Approval modes | No | No | **Yes (manual/branch/auto)** |
 | Cost optimization | N/A | N/A | **$0.02–0.05/test** |
@@ -225,14 +227,31 @@ awt-skill/
 | `aat validate --strict` | Validate YAML + quality checks |
 | `aat learn platform -p <key> -t <tip>` | Add platform-specific tip |
 
-## Requirements
+## System Dependencies
 
-AWT skill provides guidance and scenario generation. To execute tests, you need:
+**macOS:**
+```bash
+brew install python@3.12 tesseract
+pipx install aat-devqa
+playwright install chromium
+```
 
-- **Python 3.11+**
-- **AWT CLI** — `pip install aat-devqa` (or clone [AI-Watch-Tester](https://github.com/ksgisang/AI-Watch-Tester))
-- **Playwright** — `playwright install chromium`
-- **Tesseract OCR** — `brew install tesseract` (macOS) / `apt install tesseract-ocr` (Linux)
+**Linux (Ubuntu/Debian):**
+```bash
+sudo apt install python3.12 python3.12-venv tesseract-ocr
+pipx install aat-devqa
+playwright install chromium
+```
+
+**Windows:**
+```bash
+winget install Python.Python.3.12
+choco install tesseract
+pip install aat-devqa
+playwright install chromium
+```
+
+After install, run `aat doctor` to verify everything works.
 
 ## Links
 

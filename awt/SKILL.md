@@ -1,7 +1,7 @@
 ---
 name: awt
 version: 1.1.0
-description: AI-powered E2E web app testing with self-healing DevQA loop. Generate test scenarios from URLs or natural language, execute with Playwright, auto-fix failures. Supports YAML scenarios, vision AI matching, pattern learning. Use for QA, bug detection, regression testing.
+description: AI-powered E2E web app testing with self-healing DevQA loop. Generate test scenarios from URLs or natural language, execute with Playwright, auto-fix failures. Supports YAML scenarios, visual matching (OpenCV + OCR), pattern learning. Use for QA, bug detection, regression testing.
 ---
 
 # AWT — Eyes and Hands for Your AI Coding Tool
@@ -263,7 +263,7 @@ expected_result:
     value: "/dashboard"
 ```
 
-### Actions (19 types)
+### Actions (16 types)
 
 | Category | Actions |
 |----------|---------|
