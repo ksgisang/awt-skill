@@ -40,11 +40,11 @@ Your AI coding tool is the **brain**. AWT is the **eyes and hands**.
 ```
 User: "Test the login flow on my app"
 → Your AI writes 5 scenarios (30 steps) as YAML
-→ aat run scenarios/ executes them with Playwright
+→ aat run --learn scenarios/ executes them with Playwright
 → Step 4 fails: "Dashboard text not visible"
 → Your AI reads the screenshot + source code
 → Your AI fixes src/pages/login.js
-→ aat run scenarios/ passes all steps ✓
+→ aat run --learn scenarios/ passes all steps ✓
 ```
 
 ### CLI Mode (standalone, without AI coding tool)
@@ -130,7 +130,7 @@ When `aat run` fails, it automatically outputs a **structured diagnosis** that d
   Investigation:
     □ Check if the content is loaded dynamically (add wait)
     □ Check the screenshot to see what's actually displayed
-  Retest: aat run scenarios/SC-001.yaml
+  Retest: aat run --learn scenarios/SC-001.yaml
 ```
 
 **This ensures consistent analysis quality regardless of which AI coding tool you use.** Feed this diagnosis output to your AI — even a basic AI can fix the issue with this level of detail.
@@ -163,7 +163,7 @@ aat generate --from docs/spec.md
 aat validate scenarios/
 
 # 5. Run tests (single execution)
-aat run scenarios/
+aat run --learn scenarios/
 
 # 6. Run DevQA loop (auto-heal on failure)
 aat loop scenarios/ --approval-mode manual
@@ -185,7 +185,7 @@ aat start
 | `aat config show` | Display current configuration |
 | `aat config set <key> <value>` | Set config value (e.g., `ai.provider openai`) |
 | `aat validate <path>` | Validate YAML scenario files |
-| `aat run <path>` | Execute test scenarios (single run) |
+| `aat run --learn <path>` | Execute tests + learn from fixes (always use --learn) |
 | `aat loop <path>` | Run DevQA loop with auto-healing |
 | `aat analyze <file>` | AI-analyze a spec document |
 | `aat generate --from <file>` | Generate scenarios from spec |
@@ -213,8 +213,8 @@ When running tests with `headless: false` (default), AWT provides:
 - **Browser overlay** — real-time step progress bar at top of browser window (step name, pass/fail status, counter)
 - **slowMo** — each Playwright action paused by 100ms (default) so you can see what's happening
   ```
-  aat run scenarios/ --slow-mo 200    # Slower for demos
-  aat run scenarios/ --slow-mo 0      # Disable slowMo
+  aat run --learn scenarios/ --slow-mo 200    # Slower for demos
+  aat run --learn scenarios/ --slow-mo 0      # Disable slowMo
   ```
 
 ## YAML Scenario Format
@@ -372,7 +372,7 @@ Check for side effects — does the fix break other tests? Search for other code
 
 ### Example: Complete failure analysis
 
-When user runs `aat run scenarios/` and Step 4 fails with "text 'Welcome back' not visible":
+When user runs `aat run --learn scenarios/` and Step 4 fails with "text 'Welcome back' not visible":
 
 1. **Read test output** — Step 4 assert failed on `/dashboard` page
 2. **Search codebase** — `Grep for "Welcome back"` → found in `src/components/Dashboard.tsx:42`
@@ -397,7 +397,7 @@ target:
   text: "Login"             # human-readable, OCR-matched
 ```
 
-**4. Skill Mode needs no AI API** — In Skill Mode, your AI coding tool creates scenarios directly. You don't need `aat generate` or an AI API key. Just write YAML and run `aat run scenarios/`.
+**4. Skill Mode needs no AI API** — In Skill Mode, your AI coding tool creates scenarios directly. You don't need `aat generate` or an AI API key. Just write YAML and run `aat run --learn scenarios/`.
 
 ## AI Providers
 
