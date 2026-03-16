@@ -93,6 +93,11 @@ For manual installations: `cd ~/.claude/skills/awt && git pull`
 | Browser test overlay | No | No | **Yes (live step progress)** |
 | Dependency ordering | No | No | **Yes (depends_on field)** |
 | **Skill Mode (no extra AI cost)** | No | No | **Yes** |
+| Canvas/Flutter OCR fallback | No | No | **Yes (auto)** |
+| Platform auto-detection | No | No | **Yes (7 frameworks)** |
+| Structured failure diagnosis | No | No | **Yes (AI-independent)** |
+| Multi-document YAML | No | No | **Yes (--- separator)** |
+| Strict validation | No | No | **Yes (aat validate --strict)** |
 
 ### When to use each:
 - **webapp-testing** — Quick one-off Playwright scripts for simple page checks
@@ -214,10 +219,11 @@ awt-skill/
 | `aat init` | Initialize project + AI setup + environment check |
 | `aat setup` | Configure AI provider and API key |
 | `aat generate` | AI-generate scenarios (with cost estimate + caching) |
-| `aat run` | Execute tests (browser overlay in headed mode) |
+| `aat run --learn` | Execute tests + learn from fixes (always use --learn) |
 | `aat loop` | Self-healing DevQA loop |
 | `aat cost` | View AI API usage costs |
-| `aat validate` | Validate YAML scenarios |
+| `aat validate --strict` | Validate YAML + quality checks |
+| `aat learn platform -p <key> -t <tip>` | Add platform-specific tip |
 
 ## Requirements
 

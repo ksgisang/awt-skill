@@ -421,13 +421,19 @@ target:
   description: "Type email"
 ```
 
-**7. Scroll shortcuts** — Use `"down"`, `"up"` instead of coordinates:
+**7. Scroll shortcuts** — Use `"down"`, `"up"`, `"down-far"`, `"up-far"` instead of coordinates:
 ```yaml
 - step: 2
   action: scroll
   value: "down"
-  description: "Scroll down"
+  description: "Scroll down 500px from center"
 ```
+
+**8. click_at verification** — When using `click_at` with `screenshot_before: true` or `screenshot_after: true`, AWT compares before/after screenshots and warns if the click had no visible effect (possible miss).
+
+**9. Platform auto-detection** — AWT automatically detects the frontend framework after the first `navigate` step and shows tailored tips:
+- Flutter Web (CanvasKit/HTML), React, Next.js, Vue, Angular, Svelte
+- Custom tips can be added: `aat learn platform -p react_spa -t "your tip"`
 
 ## AI Providers
 
