@@ -36,9 +36,18 @@ AWT (AI Watch Tester) is an AI-powered DevQA loop orchestrator. It scans website
 
 The loop repeats (up to 10 iterations by default) until all tests pass or the user stops it.
 
-## Quick Start
+## Prerequisites
 
-**Before running any AWT command, verify your environment with `aat doctor`.** It checks Python, Playwright, Tesseract, AI provider connection, and shows OS-specific install commands for missing dependencies.
+If the `aat` command is not found, install it first:
+
+```bash
+pip install aat-devqa
+playwright install chromium
+```
+
+On macOS: `brew install tesseract` — on Linux: `apt install tesseract-ocr`
+
+## Quick Start
 
 ```bash
 # 0. Check environment (auto-runs during init, or run manually)
