@@ -323,6 +323,21 @@ When user runs `aat run scenarios/` and Step 4 fails with "text 'Welcome back' n
 
 **Key principle:** The AI agent (you) can read ANY file in the project. Use Grep, Glob, and Read tools aggressively to trace from failed test → UI component → API route → database query until you find the root cause.
 
+## Best Practices & Tips
+
+**1. Real browser ≠ HTML source** — On i18n (multilingual) sites, the HTML source may show default-language text while the browser renders translated text. AWT tests in a real browser, so always write assertions based on **what the user actually sees on screen**, not what's in the HTML source.
+
+**2. One scenario per file** — AWT supports one scenario per YAML file. Multi-document YAML (`---` separator) is not supported. Create separate files: `SC-001_login.yaml`, `SC-002_dashboard.yaml`.
+
+**3. Use selector + text together** — When both a CSS selector and OCR text are available, specify both in the target. If OCR fails (font rendering, contrast), the selector provides a fallback:
+```yaml
+target:
+  selector: "#login-btn"    # reliable fallback
+  text: "Login"             # human-readable, OCR-matched
+```
+
+**4. Skill Mode needs no AI API** — In Skill Mode, your AI coding tool creates scenarios directly. You don't need `aat generate` or an AI API key. Just write YAML and run `aat run scenarios/`.
+
 ## AI Providers
 
 | Provider | Vision | Structured Output | Cost | Offline |
