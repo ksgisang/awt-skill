@@ -1,6 +1,6 @@
-# AWT — AI-Powered E2E Testing Skill
+# AWT — Eyes and Hands for Your AI Coding Tool
 
-**Test smarter, fix faster.** AWT scans your website, generates test scenarios with AI, executes them with Playwright, and auto-fixes failures in a self-healing DevQA loop.
+**Your AI coding tool is smart. But it can't see or click a web page.** AWT gives it a real browser — so it can test, find bugs, and fix them without you lifting a finger.
 
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](LICENSE)
 [![Agent Skills](https://img.shields.io/badge/Agent_Skills-Compatible-brightgreen.svg)](https://agentskills.io)
@@ -9,14 +9,29 @@
 
 ## What is AWT?
 
-AWT (AI Watch Tester) is an Agent Skill that brings AI-powered E2E testing to your coding workflow. Instead of writing Playwright scripts manually, you describe tests in plain YAML or natural language — AWT handles the rest.
+AWT is the **execution engine** for AI-powered E2E testing. Your AI coding tool designs the tests; AWT runs them in a real browser with Playwright.
+
+**How it works in Skill Mode (no extra AI API key needed):**
+
+```
+You: "Test the login flow on https://mysite.com"
+
+Your AI coding tool:
+  → Writes 5 YAML scenarios (30 steps)
+  → Runs: aat run scenarios/
+  → Reads failure: "Step 4: Dashboard text not visible"
+  → Reads screenshot + source code
+  → Fixes src/pages/login.js:23
+  → Re-runs: aat run scenarios/
+  → All 5 scenarios pass ✓
+```
 
 **Key capabilities:**
-- **Scan** any website and auto-detect features (login forms, carts, search bars)
-- **Generate** test scenarios from URLs, spec documents, or natural language
-- **Execute** with Playwright + human-like mouse/keyboard interaction
-- **Self-heal** — when tests fail, AI analyzes the cause, fixes the code, and re-tests
-- **Learn** — successful matches are stored in SQLite, making tests faster over time
+- **Execute** tests in a real browser with human-like mouse/keyboard interaction
+- **See** — take screenshots, detect elements via OCR and image matching
+- **Report** — step-by-step pass/fail with error details and screenshots
+- **Self-heal** (CLI mode) — `aat loop` auto-fixes failures with its own AI
+- **Learn** — successful matches stored in SQLite, getting faster over time
 
 ## Installation
 
@@ -68,11 +83,13 @@ After installation, the skill is available as `/awt` in Claude Code and auto-tri
 | Scenario caching | No | No | **Yes (same spec = no re-call)** |
 | Browser test overlay | No | No | **Yes (live step progress)** |
 | Dependency ordering | No | No | **Yes (depends_on field)** |
+| **Skill Mode (no extra AI cost)** | No | No | **Yes** |
 
 ### When to use each:
 - **webapp-testing** — Quick one-off Playwright scripts for simple page checks
 - **playwright-skill** — When you need fine-grained Playwright API control
-- **AWT** — When you want AI-driven test generation, self-healing, and a complete DevQA pipeline
+- **AWT Skill Mode** — Your AI coding tool designs tests, AWT executes them. **No extra AI API key needed.**
+- **AWT CLI Mode** — Standalone automated testing with `aat generate` + `aat loop` for CI/CD
 
 ## Supported AI Coding Tools
 

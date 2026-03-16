@@ -3,9 +3,9 @@ name: awt
 description: AI-powered E2E web app testing with self-healing DevQA loop. Generate test scenarios from URLs or natural language, execute with Playwright, auto-fix failures. Supports YAML scenarios, vision AI matching, pattern learning. Use for QA, bug detection, regression testing.
 ---
 
-# AWT — AI-Powered E2E Testing
+# AWT — Eyes and Hands for Your AI Coding Tool
 
-AWT (AI Watch Tester) is an AI-powered DevQA loop orchestrator. It scans websites, generates test scenarios, executes them with Playwright, and auto-fixes failures — repeating until all tests pass.
+AWT (AI Watch Tester) gives your AI coding tool the ability to **see and interact with web applications**. Your AI designs the test strategy; AWT executes it with a real browser — clicking, typing, taking screenshots, and reporting back.
 
 ## When to Use This Skill
 
@@ -23,6 +23,37 @@ AWT (AI Watch Tester) is an AI-powered DevQA loop orchestrator. It scans website
 - Performance/load testing (use k6, Artillery, etc.)
 - Mobile native app testing (AWT supports web and desktop only)
 - Static code analysis without UI interaction
+
+## Skill Mode vs CLI Mode
+
+AWT works in two modes:
+
+### Skill Mode (recommended — you are here)
+Your AI coding tool is the **brain**. AWT is the **eyes and hands**.
+
+- **Your AI** designs test scenarios, analyzes failures, fixes source code
+- **AWT** executes tests in a real browser via `aat run`
+- **No extra AI API key needed** — your AI coding tool's intelligence is used directly
+- **Superior results** — your AI sees the full project context, screenshots, and source code
+
+```
+User: "Test the login flow on my app"
+→ Your AI writes 5 scenarios (30 steps) as YAML
+→ aat run scenarios/ executes them with Playwright
+→ Step 4 fails: "Dashboard text not visible"
+→ Your AI reads the screenshot + source code
+→ Your AI fixes src/pages/login.js
+→ aat run scenarios/ passes all steps ✓
+```
+
+### CLI Mode (standalone, without AI coding tool)
+AWT handles everything independently using its own AI adapter.
+
+- Requires separate AI API key (Claude, OpenAI, Gemini, DeepSeek, or Ollama)
+- `aat generate` creates scenarios via AI, `aat loop` auto-heals
+- Good for CI/CD pipelines and automated environments
+
+**In Skill Mode, always prefer writing YAML scenarios directly and running `aat run`, over using `aat generate` or `aat loop`.** Your AI coding tool produces better scenarios because it understands the project context.
 
 ## 5-Step Workflow
 
