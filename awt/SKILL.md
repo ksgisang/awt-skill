@@ -190,6 +190,7 @@ aat start
 | `aat analyze <file>` | AI-analyze a spec document |
 | `aat generate --from <file>` | Generate scenarios from spec |
 | `aat start` | Interactive guided mode |
+| `aat learn platform -p <key> -t <tip>` | Add custom platform-specific tip |
 | `aat cost` | View AI API usage costs (daily/monthly) |
 | `aat dashboard` | Web UI with live screenshots |
 
