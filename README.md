@@ -57,7 +57,16 @@ cp -r /tmp/awt-skill/awt .claude/skills/awt
 rm -rf /tmp/awt-skill
 ```
 
-After installation, the skill is available as `/awt` in Claude Code and auto-triggers on testing-related prompts.
+After installation, the skill auto-triggers on testing-related prompts.
+
+### Updating
+
+```bash
+# Re-run the same install command to get the latest version
+npx skills add ksgisang/awt-skill --skill awt -g -y
+```
+
+For manual installations: `cd ~/.claude/skills/awt && git pull`
 
 ## Comparison with Other Testing Skills
 

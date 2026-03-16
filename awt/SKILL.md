@@ -1,5 +1,6 @@
 ---
 name: awt
+version: 1.1.0
 description: AI-powered E2E web app testing with self-healing DevQA loop. Generate test scenarios from URLs or natural language, execute with Playwright, auto-fix failures. Supports YAML scenarios, vision AI matching, pattern learning. Use for QA, bug detection, regression testing.
 ---
 
@@ -69,16 +70,34 @@ The loop repeats (up to 10 iterations by default) until all tests pass or the us
 
 ## Prerequisites
 
-If the `aat` command is not found, install it first:
+If the `aat` command is not found, install it:
 
+**macOS:**
 ```bash
+brew install python@3.12 tesseract
+pipx install aat-devqa
+playwright install chromium
+```
+
+**Linux (Ubuntu/Debian):**
+```bash
+sudo apt install python3.12 python3.12-venv tesseract-ocr
+pipx install aat-devqa
+playwright install chromium
+```
+
+**Windows:**
+```bash
+winget install Python.Python.3.12
 pip install aat-devqa
 playwright install chromium
 ```
 
-On macOS: `brew install tesseract` — on Linux: `apt install tesseract-ocr`
-
-> Install fails? Python 3.11+ is required. Check with `python3 --version`.
+**Troubleshooting:**
+- `python3 --version` shows < 3.11? Install Python 3.12 first (see above)
+- `pip install` blocked by PEP 668? Use `pipx install aat-devqa` instead
+- `pipx` not found? `brew install pipx` (macOS) or `pip install --user pipx` (Linux)
+- After install, run `aat doctor` to verify everything works
 
 ## Quick Start
 
