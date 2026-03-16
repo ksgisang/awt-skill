@@ -47,6 +47,8 @@ playwright install chromium
 
 On macOS: `brew install tesseract` — on Linux: `apt install tesseract-ocr`
 
+> Install fails? Python 3.11+ is required. Check with `python3 --version`.
+
 ## Quick Start
 
 ```bash
