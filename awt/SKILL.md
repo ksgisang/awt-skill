@@ -115,6 +115,32 @@ playwright install chromium
 - `pipx` not found? `brew install pipx` (macOS) or `pip install --user pipx` (Linux)
 - After install, run `aat doctor` to verify everything works
 
+## Failure Diagnosis (AI-independent)
+
+When `aat run` fails, it automatically outputs a **structured diagnosis** that does NOT depend on any AI:
+
+```
+📊 AWT Diagnosis (deterministic — no AI)
+  Step:     4 — Verify dashboard loaded
+  Error:    Text 'Welcome' not visible on page
+  URL:      https://mysite.com/login    ← still on login, not dashboard
+  Title:    Login Page
+  Screenshot: .aat/screenshots/fail_step4.png
+  Category: assertion_failed
+  Investigation:
+    □ Check if the content is loaded dynamically (add wait)
+    □ Check the screenshot to see what's actually displayed
+  Retest: aat run scenarios/SC-001.yaml
+```
+
+**This ensures consistent analysis quality regardless of which AI coding tool you use.** Feed this diagnosis output to your AI — even a basic AI can fix the issue with this level of detail.
+
+Before running scenarios, validate quality with:
+```bash
+aat validate scenarios/ --strict
+# Warns: missing assertions, hardcoded URLs, empty descriptions
+```
+
 ## Quick Start
 
 ```bash
