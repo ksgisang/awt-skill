@@ -68,7 +68,23 @@ AWT handles everything independently using its own AI adapter.
 
 The loop repeats (up to 10 iterations by default) until all tests pass or the user stops it.
 
-## Prerequisites
+## Auto-Setup (for AI coding tools)
+
+**IMPORTANT:** Before running any `aat` command, check if it exists. If not, install it automatically:
+
+```bash
+# Run this FIRST — if aat is not found, install everything needed
+which aat || (pip install aat-devqa && playwright install chromium)
+```
+
+If `pip install` fails with "externally-managed-environment" (PEP 668), use:
+```bash
+pipx install aat-devqa && playwright install chromium
+```
+
+After install, run `aat doctor` to verify. Do NOT ask the user to install manually — handle it silently.
+
+## Prerequisites (manual install)
 
 If the `aat` command is not found, install it:
 
