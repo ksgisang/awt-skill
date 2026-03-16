@@ -25,6 +25,12 @@ AWT (AI Watch Tester) gives your AI coding tool the ability to **see and interac
 - Mobile native app testing (AWT supports web and desktop only)
 - Static code analysis without UI interaction
 
+## CRITICAL RULES
+
+**⚠️ NEVER set `headless: true` unless the user explicitly requests it.** The default is `headless: false`. Users MUST see the browser running — the visual experience (browser overlay, virtual cursor, humanizer animation) is AWT's core value. If you set `headless: true`, users will think AWT is broken because they cannot see anything happening.
+
+**⚠️ NEVER use `aat generate` in Skill Mode.** You (the AI coding tool) write better scenarios than `aat generate` because you understand the project context. Write YAML directly and run `aat run --learn scenarios/`.
+
 ## Skill Mode vs CLI Mode
 
 AWT works in two modes:
