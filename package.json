@@ -13,5 +13,5 @@
   },
   "license": "AGPL-3.0",
   "author": "AILoopLab <ksgisang@gmail.com>",
-  "files": ["SKILL.md", "references/", "templates/", "LICENSE", "README.md"]
+  "files": ["awt/", "LICENSE", "README.md"]
 }

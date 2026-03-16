@@ -16,7 +16,7 @@
     "claude-code", "antigravity", "cursor", "codex", "gemini-cli",
     "amp", "cline", "aider", "windsurf", "roo-code", "pearai"
   ],
-  "skillFile": "../SKILL.md",
+  "skillFile": "../awt/SKILL.md",
   "triggers": {
     "keywords": ["test", "E2E", "QA", "bug", "scenario", "web app", "playwright", "regression", "self-healing"],
     "filePatterns": ["*.yaml", "*.yml", "aat.config.yaml", "scenarios/**"]

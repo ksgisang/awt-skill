@@ -20,24 +20,26 @@ AWT (AI Watch Tester) is an Agent Skill that brings AI-powered E2E testing to yo
 
 ## Installation
 
-### Claude Code (recommended)
+### One-line install (recommended)
 
 ```bash
-npx skills add ksgisang/awt-skill -g
+npx skills add ksgisang/awt-skill --skill awt -g
 ```
 
 ### Manual Installation
 
 ```bash
-# Clone to your global skills directory
-git clone https://github.com/ksgisang/awt-skill.git ~/.claude/skills/awt
+git clone https://github.com/ksgisang/awt-skill.git /tmp/awt-skill
+cp -r /tmp/awt-skill/awt ~/.claude/skills/awt
+rm -rf /tmp/awt-skill
 ```
 
 ### Per-Project Installation
 
 ```bash
-# Clone to project-level skills directory
-git clone https://github.com/ksgisang/awt-skill.git .claude/skills/awt
+git clone https://github.com/ksgisang/awt-skill.git /tmp/awt-skill
+cp -r /tmp/awt-skill/awt .claude/skills/awt
+rm -rf /tmp/awt-skill
 ```
 
 After installation, the skill is available as `/awt` in Claude Code and auto-triggers on testing-related prompts.
@@ -163,14 +165,15 @@ Scan → Plan → Review → Execute → Heal
 
 ```
 awt-skill/
-├── SKILL.md              # Main skill definition (loaded by AI agents)
-├── references/
-│   ├── scenario-schema.md  # Full YAML schema reference
-│   ├── cli-reference.md    # CLI command reference
-│   └── config-reference.md # Configuration options
-├── templates/
-│   ├── scenario-template.yaml  # Blank scenario template
-│   └── config-template.yaml    # Default config template
+├── awt/                        # ← Skill content (installed by npx skills)
+│   ├── SKILL.md                # Main skill definition
+│   ├── references/
+│   │   ├── scenario-schema.md  # Full YAML schema reference
+│   │   ├── cli-reference.md    # CLI command reference
+│   │   └── config-reference.md # Configuration options
+│   └── templates/
+│       ├── scenario-template.yaml
+│       └── config-template.yaml
 ├── README.md
 ├── LICENSE
 ├── CONTRIBUTING.md
