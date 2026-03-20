@@ -16,6 +16,10 @@ steps:
     target:
       text: "Button Text"
     description: "Click the target button"
+    # 3-tier hybrid matching (defaults shown — usually omit these):
+    # method: auto        # auto | template | ocr | vision
+    # learn: true         # save to pattern DB for faster future matching
+    # fallback: true      # try next tier if current method fails
 
   - step: 3
     action: assert

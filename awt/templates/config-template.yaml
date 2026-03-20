@@ -16,7 +16,7 @@ engine:
 matching:
   confidence_threshold: 0.85
   ocr_languages: ["eng"]
-  chain_order: ["learned", "template", "ocr", "feature"]
+  chain_order: ["learned", "template", "ocr", "feature", "vision_ai"]
 
 humanizer:
   enabled: true

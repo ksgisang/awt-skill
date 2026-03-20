@@ -28,6 +28,9 @@
 | `optional` | bool | No | `false` | Don't fail scenario if step fails |
 | `assert_type` | AssertType | Conditional | — | Required if action is `assert` |
 | `expected` | list[ExpectedResult] | Conditional | `[]` | Required if action is `assert` |
+| `method` | FindMethod | No | `auto` | Matching method: `auto`, `template`, `ocr`, `vision` |
+| `learn` | bool | No | `true` | Save successful match to pattern DB |
+| `fallback` | bool | No | `true` | Allow tier fallback when specific method fails |
 
 ## TargetSpec
 
@@ -88,22 +91,33 @@
 | `url_not_contains` | Current URL does NOT contain substring |
 | `screenshot_match` | Current screen matches reference image |
 
-## MatchMethod Enum
+## FindMethod Enum (step-level)
+
+| Value | Description |
+|-------|-------------|
+| `auto` | 3-tier fallback chain (default): template → OCR → Vision AI |
+| `template` | Force template matching only (OpenCV) |
+| `ocr` | Force OCR only (Tesseract with CLAHE + sharpening) |
+| `vision` | Force Vision AI only (Claude API, cost incurred) |
+
+When `fallback: true` (default), a failed specific method falls back to the full chain.
+
+## MatchMethod Enum (target-level)
 
 | Value | Algorithm | Best For |
 |-------|-----------|----------|
 | `learned` | SQLite lookup | Previously successful matches |
 | `template` | cv2.matchTemplate | Exact visual matching |
-| `ocr` | pytesseract | Text-based element finding |
+| `ocr` | pytesseract + CLAHE + sharpening | Text-based element finding |
 | `feature` | ORB keypoints | Rotation/scale invariant |
-| `vision_ai` | (stub) | Future AI-based matching |
+| `vision_ai` | Claude Vision API | Canvas/CanvasKit text, complex UIs |
 
 ## Action-Value Requirements
 
 | Action | Requires target | Requires value | Value format |
 |--------|----------------|----------------|-------------|
 | `navigate` | No | Yes | URL (supports `{{url}}`) |
-| `find_and_click` | Yes | No | — |
+| `find_and_click` | Yes | No | — (supports `method`, `learn`, `fallback`) |
 | `find_and_type` | Yes | Yes | Text to type |
 | `find_and_clear` | Yes | No | — |
 | `click_at` | No | Yes | `"x,y"` |

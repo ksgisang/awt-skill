@@ -38,11 +38,12 @@ matching:
   scale_range_max: 2.0                  # 1.0–4.0
   grayscale: true
   ocr_languages: ["eng", "kor"]         # Tesseract language codes
-  chain_order:                          # Matcher priority
-    - "learned"
-    - "template"
-    - "ocr"
-    - "feature"
+  chain_order:                          # Matcher priority (3-tier)
+    - "learned"                         # Tier 1: saved patterns (instant)
+    - "template"                        # Tier 1: OpenCV matching (free)
+    - "ocr"                             # Tier 2: Tesseract + CLAHE (free)
+    - "feature"                         # Tier 2: ORB keypoints (free)
+    - "vision_ai"                       # Tier 3: Claude Vision API (paid)
 
 # Human-like Interaction
 humanizer:

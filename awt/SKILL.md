@@ -280,18 +280,40 @@ expected_result:
 | Assert | `assert` (types: `text_visible`, `text_equals`, `image_visible`, `url_contains`, `url_not_contains`, `screenshot_match`) |
 | Utility | `wait`, `screenshot`, `scroll` |
 
-### Target Matching
+### Target Matching (3-Tier Hybrid)
+
+AWT uses a 3-tier fallback system to find UI elements — optimized for Canvas-rendered text (Flutter CanvasKit, etc.) where OCR alone is unreliable:
+
+| Tier | Method | Cost | Speed |
+|------|--------|------|-------|
+| 1 | Template matching (OpenCV) + saved templates | Free | Fast |
+| 2 | OCR (Tesseract + CLAHE + sharpening + 2x upscale) | Free | Medium |
+| 3 | Vision AI (Claude API) | Paid | Slow |
+
+Successful matches at any tier are **auto-saved as templates** to `~/.awt/templates/` — so the next run uses Tier 1 (free, instant). Match history is tracked in SQLite for adaptive method selection.
 
 ```yaml
 target:
   text: "Login"              # OCR text matching
   image: "btn-login.png"     # Template image matching
   selector: "#login-btn"     # CSS selector (highest priority)
-  match_method: ocr           # Force specific matcher
+  match_method: ocr           # Force specific matcher (target-level)
   confidence: 0.9             # Override threshold (default: 0.85)
 ```
 
-**Matcher chain** (tried in order): `learned → template → ocr → feature`
+**Step-level matching options** (for find_and_* actions):
+```yaml
+- step: 2
+  action: find_and_click
+  target:
+    text: "AI Marketing"
+  method: auto          # auto (default) | template | ocr | vision
+  learn: true           # save to pattern DB (default: true)
+  fallback: true        # try next tier on failure (default: true)
+  description: "Click the AI Marketing button"
+```
+
+**Matcher chain** (tried in order): `learned → saved templates → template → ocr → feature → vision_ai`
 
 ## Configuration
 
@@ -316,7 +338,7 @@ engine:
 matching:
   confidence_threshold: 0.85
   ocr_languages: ["eng", "kor"]
-  chain_order: ["learned", "template", "ocr", "feature"]
+  chain_order: ["learned", "template", "ocr", "feature", "vision_ai"]
 
 humanizer:
   enabled: true
@@ -414,14 +436,22 @@ target:
   description: "Dismiss any popup/modal"
 ```
 
-**6. Flutter/Canvas SPA** — Flutter Web renders text on Canvas, not DOM. AWT auto-falls back to OCR for `text_visible` assertions. For input fields, use `click_at` + `type_text` instead of `find_and_type` (Flutter creates hidden invisible inputs):
+**6. Flutter/Canvas SPA** — Flutter Web renders text on Canvas, not DOM. AWT's 3-tier hybrid matching handles this: Tier 1 (template) uses saved screenshots, Tier 2 (OCR) uses CLAHE contrast enhancement + sharpening, Tier 3 (Vision AI) uses Claude to locate elements. For input fields, use `click_at` + `type_text` instead of `find_and_type` (Flutter creates hidden invisible inputs):
 ```yaml
-# Instead of find_and_type (fails on Flutter):
+# find_and_click works with 3-tier matching (auto-fallback):
 - step: 2
+  action: find_and_click
+  target:
+    text: "Login"
+  method: auto              # template → OCR → Vision AI fallback
+  description: "Click login button"
+
+# But for input fields on Flutter, use click_at + type_text:
+- step: 3
   action: click_at
   value: "400,300"
   description: "Click the email field"
-- step: 3
+- step: 4
   action: type_text
   value: "user@example.com"
   description: "Type email"
