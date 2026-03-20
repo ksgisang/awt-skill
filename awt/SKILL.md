@@ -442,7 +442,11 @@ ATTEMPTS: 1/5
 Follow this exact loop when the user asks to test with AWT:
 
 1. **Run:** `aat run --skill-mode {scenario_file}`
-2. **If all steps pass** → report success to the user
+2. **If all steps pass** → parse the `=== AWT SKILL VERIFY ===` block:
+   - **Read FINAL_SCREENSHOT** to visually confirm the browser is on the correct page
+   - If `NAV_ZONE_WARNINGS` exist, pay extra attention — clicks in the left 20% of the screen often hit navigation panels instead of main content (common False Positive)
+   - If the screen shows the wrong page (e.g., nav panel page instead of expected content) → this is a **False Positive** — fix the scenario and re-run
+   - If the screen is correct → report success to the user
 3. **If a step fails** → parse the `=== AWT SKILL DEVQA ===` block, then:
    - Read the SCREENSHOT file to see the actual browser state
    - Analyze the ERROR and CATEGORY to determine root cause
@@ -467,6 +471,8 @@ Follow this exact loop when the user asks to test with AWT:
 - **One fix per iteration** — change only the failing step, not multiple steps
 - **No duplicate fixes** — if the same change was tried before, escalate to source code analysis
 - **Always read screenshots** — the SCREENSHOT path points to a real PNG file; use your Read tool to view it
+- **Always verify FINAL_SCREENSHOT on success** — all steps passing does NOT mean the test is correct. Read the final screenshot to confirm the browser shows the expected page, not a nav panel or wrong section
+- **Watch for NAV_ZONE_WARNINGS** — clicks in the left 20% of the viewport often hit navigation panels instead of main content. If you see these warnings, add a CSS selector to the target to be more specific, or use `click_at` with exact coordinates
 - **Comment your fixes** — add `# Fixed: ...` comments in the YAML so the history is traceable
 - **Works with any AI** — the structured output is plain text, parseable by any AI coding assistant
 - **No AWT AI key needed** — your AI coding tool's intelligence drives the loop
@@ -476,7 +482,7 @@ Follow this exact loop when the user asks to test with AWT:
 ```
 User: "Test the login flow"
 
-AI → writes scenarios/login.yaml (3 steps: navigate, type email, click login, assert dashboard)
+AI → writes scenarios/login.yaml (4 steps: navigate, type email, click login, assert dashboard)
 AI → runs: aat run --skill-mode scenarios/login.yaml
 
 Step 3 fails: "Text 'Login' not found"
@@ -486,6 +492,8 @@ AI → edits scenarios/login.yaml step 3: text: "Login" → text: "Sign In"
 AI → runs: aat run --skill-mode scenarios/login.yaml
 
 All 4 steps pass ✓
+AI → reads .aat/screenshots/final_screen.png → confirms dashboard page is shown
+AI → "Login flow test passed. Dashboard page verified."
 AI → "Login flow test passed. All steps completed successfully."
 ```
 
