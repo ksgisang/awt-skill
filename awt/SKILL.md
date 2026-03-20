@@ -269,16 +269,70 @@ expected_result:
     value: "/dashboard"
 ```
 
-### Actions (16 types)
+### Actions (18 types)
 
 | Category | Actions |
 |----------|---------|
 | Navigation | `navigate`, `go_back`, `refresh` |
 | Find + Mouse | `find_and_click`, `find_and_double_click`, `find_and_right_click` |
 | Find + Keyboard | `find_and_type`, `find_and_clear` |
-| Direct | `click_at`, `type_text`, `press_key`, `key_combo` |
-| Assert | `assert` (types: `text_visible`, `text_equals`, `image_visible`, `url_contains`, `url_not_contains`, `screenshot_match`) |
+| Direct | `click_at`, `type_text` (supports `verify: true`), `press_key`, `key_combo` |
+| Assert | `assert`, `assert_text` (OCR, region-aware), `assert_screen_changed` (pixel diff) |
 | Utility | `wait`, `screenshot`, `scroll` |
+
+### Region Parameter
+
+All `find_and_*` and `assert_text` actions support `region` to restrict the search area — critical for avoiding False Positives on Canvas/Flutter apps where OCR may match nav panel text instead of main content:
+
+```yaml
+- action: find_and_click
+  target:
+    text: "Generate"
+  region: main           # exclude left nav panel (20%)
+  description: "Click generate button in main content"
+```
+
+| Region | Area |
+|--------|------|
+| `full` | Entire screen (default, backward compatible) |
+| `top` | Top 30% |
+| `bottom` | Bottom 30% |
+| `left` | Left 20% (navigation zone) |
+| `right` | Right 80% (excluding nav) |
+| `center` | Central 60% x 60% |
+| `main` | Everything except left 20% |
+
+### Result Verification (Flutter/Canvas)
+
+For Canvas-rendered apps where DOM assertions don't work, use these actions to verify actual screen state:
+
+**`assert_text`** — verify text exists via OCR in a specific region:
+```yaml
+- action: assert_text
+  target:
+    text: "bright natural light"
+  region: main
+  message: "Text input was not reflected on screen"
+  description: "Verify typed text appears in main area"
+```
+
+**`assert_screen_changed`** — verify the screen actually changed after an action:
+```yaml
+- action: assert_screen_changed
+  threshold: 0.05        # 5% pixel change required
+  region: main
+  message: "Button click had no visible effect"
+  description: "Verify screen changed after click"
+```
+
+**`type_text` with `verify`** — auto-verify typed text appears on screen:
+```yaml
+- action: type_text
+  value: "bright natural light"
+  verify: true            # auto-runs assert_text after typing
+  region: main
+  description: "Type prompt and verify it appears"
+```
 
 ### Target Matching (3-Tier Hybrid)
 
@@ -520,26 +574,38 @@ target:
   description: "Dismiss any popup/modal"
 ```
 
-**6. Flutter/Canvas SPA** — Flutter Web renders text on Canvas, not DOM. AWT's 3-tier hybrid matching handles this: Tier 1 (template) uses saved screenshots, Tier 2 (OCR) uses CLAHE contrast enhancement + sharpening, Tier 3 (Vision AI) uses Claude to locate elements. For input fields, use `click_at` + `type_text` instead of `find_and_type` (Flutter creates hidden invisible inputs):
+**6. Flutter/Canvas SPA** — Flutter Web renders text on Canvas, not DOM. Key rules for reliable testing:
+
 ```yaml
-# find_and_click works with 3-tier matching (auto-fallback):
+# 1. Always use region: main to avoid clicking nav panel text
 - step: 2
   action: find_and_click
   target:
-    text: "Login"
-  method: auto              # template → OCR → Vision AI fallback
-  description: "Click login button"
+    text: "Generate"
+  region: main
+  description: "Click generate button (main area only)"
 
-# But for input fields on Flutter, use click_at + type_text:
+# 2. Verify every action with assert_text or assert_screen_changed
 - step: 3
+  action: assert_screen_changed
+  threshold: 0.05
+  region: main
+  description: "Verify screen changed after click"
+
+# 3. For input fields, use click_at + type_text with verify
+- step: 4
   action: click_at
   value: "400,300"
-  description: "Click the email field"
-- step: 4
+  description: "Click the text input field"
+- step: 5
   action: type_text
-  value: "user@example.com"
-  description: "Type email"
+  value: "bright natural light"
+  verify: true
+  region: main
+  description: "Type prompt and verify it appears"
 ```
+
+**Rule: on Flutter/Canvas apps, every `find_and_click` or `type_text` should be followed by an assert step.** Without DOM, the only reliable way to detect False Positives is visual verification.
 
 **7. Scroll shortcuts** — Use `"down"`, `"up"`, `"down-far"`, `"up-far"` instead of coordinates:
 ```yaml

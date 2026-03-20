@@ -53,27 +53,41 @@
 | `tolerance` | float | No | `0.0` |
 | `case_insensitive` | bool | No | `false` |
 
-## ActionType Enum (19 values)
+## ScreenRegion Enum
+
+| Value | Area |
+|-------|------|
+| `full` | Entire screen (default) |
+| `top` | Top 30% |
+| `bottom` | Bottom 30% |
+| `left` | Left 20% |
+| `right` | Right 80% |
+| `center` | Central 60% x 60% |
+| `main` | Everything except left 20% (nav excluded) |
+
+## ActionType Enum (18 values)
 
 **Navigation:** `navigate`, `go_back`, `refresh`
 
-**Find + Mouse (require target):**
+**Find + Mouse (require target, support `region`):**
 - `find_and_click` — Click element found by image/text/selector
 - `find_and_double_click` — Double-click
 - `find_and_right_click` — Right-click
 
-**Find + Keyboard (require target):**
+**Find + Keyboard (require target, support `region`):**
 - `find_and_type` — Find element, then type `value` into it
 - `find_and_clear` — Find element, then clear its content
 
 **Direct:**
 - `click_at` — Click at coordinates (value: `"x,y"`)
-- `type_text` — Type into currently focused element
+- `type_text` — Type into focused element (supports `verify: true`, `region`)
 - `press_key` — Press key (value: `Enter`, `Tab`, `Escape`, etc.)
 - `key_combo` — Key combination (value: `"Ctrl+A"`, `"Cmd+C"`)
 
 **Assert:**
 - `assert` — Validate with `assert_type` and `expected`
+- `assert_text` — OCR text verification in region (require target with `text`)
+- `assert_screen_changed` — Pixel diff vs previous screenshot (`threshold`, `region`)
 
 **Utility:**
 - `wait` — Wait milliseconds (value: `"2000"`)
