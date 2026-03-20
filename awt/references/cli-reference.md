@@ -73,11 +73,19 @@ aat generate --from <file> [--config PATH] [--output DIR]
 Execute scenarios once (no healing loop).
 
 ```bash
-aat run <scenarios_path> [--config PATH]
+aat run <scenarios_path> [OPTIONS]
 ```
 
+| Option | Short | Default | Description |
+|--------|-------|---------|-------------|
+| `--config` | `-c` | auto-detect | Config file path |
+| `--slow-mo` | — | `100` (headed) | Slow down actions by N ms |
+| `--learn` | — | `false` | Learn from fixes (record healed steps) |
+| `--skill-mode` | — | `false` | Output structured diagnosis for AI coding assistants |
+
 - Exit code 0 if all pass, 1 if any fail
-- Generates markdown report in `reports/`
+- `--skill-mode` outputs `=== AWT SKILL DEVQA ===` block on failure for AI parsing
+- Tracks attempt count across runs (resets on success or different scenario)
 
 ### `aat loop`
 Execute DevQA healing loop.
