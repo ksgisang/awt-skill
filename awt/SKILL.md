@@ -574,30 +574,46 @@ target:
   description: "Dismiss any popup/modal"
 ```
 
-**6. Flutter/Canvas SPA** — Flutter Web renders text on Canvas, not DOM. Key rules for reliable testing:
+**6. Flutter/Canvas SPA** — Flutter Web renders text on Canvas, not DOM. AWT automatically detects Flutter CanvasKit and activates **Flutter Semantics** matching — reads `flt-semantics` aria-labels and ARIA roles directly, bypassing OCR entirely.
+
+**How it works:** Flutter's Semantics framework creates accessibility nodes (`flt-semantics` elements with `aria-label`). AWT queries these via Playwright before falling back to OCR. This is faster and more accurate than OCR for Flutter apps.
+
+**Matching priority on Flutter CanvasKit:**
+1. CSS selector (if provided)
+2. **Flutter Semantics** (auto-activated, no config needed)
+3. Playwright text search
+4. OCR (3-tier: template → Tesseract → Vision AI)
 
 ```yaml
-# 1. Always use region: main to avoid clicking nav panel text
+# find_and_click automatically uses Semantics on Flutter
 - step: 2
   action: find_and_click
   target:
     text: "Generate"
-  region: main
-  description: "Click generate button (main area only)"
+  region: main              # still use region to avoid nav hits
+  description: "Click generate (auto-uses Semantics on Flutter)"
 
-# 2. Verify every action with assert_text or assert_screen_changed
+# Force Semantics explicitly (skips other methods)
 - step: 3
+  action: find_and_click
+  target:
+    text: "Login"
+  method: semantics
+  description: "Force Flutter Semantics lookup"
+
+# Verify actions with assert_text or assert_screen_changed
+- step: 4
   action: assert_screen_changed
   threshold: 0.05
   region: main
   description: "Verify screen changed after click"
 
-# 3. For input fields, use click_at + type_text with verify
-- step: 4
+# For input fields, use click_at + type_text with verify
+- step: 5
   action: click_at
   value: "400,300"
   description: "Click the text input field"
-- step: 5
+- step: 6
   action: type_text
   value: "bright natural light"
   verify: true

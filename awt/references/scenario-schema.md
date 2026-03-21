@@ -109,22 +109,26 @@
 
 | Value | Description |
 |-------|-------------|
-| `auto` | 3-tier fallback chain (default): template → OCR → Vision AI |
+| `auto` | Full chain (default): Semantics → template → OCR → Vision AI |
+| `semantics` | Force Flutter Semantics only (aria-label/role lookup) |
 | `template` | Force template matching only (OpenCV) |
 | `ocr` | Force OCR only (Tesseract with CLAHE + sharpening) |
 | `vision` | Force Vision AI only (Claude API, cost incurred) |
 
 When `fallback: true` (default), a failed specific method falls back to the full chain.
 
+`semantics` is auto-activated on Flutter CanvasKit apps — no need to set explicitly unless you want to force it.
+
 ## MatchMethod Enum (target-level)
 
 | Value | Algorithm | Best For |
 |-------|-----------|----------|
 | `learned` | SQLite lookup | Previously successful matches |
+| `semantics` | Flutter Semantics (aria-label) | Flutter CanvasKit apps |
 | `template` | cv2.matchTemplate | Exact visual matching |
 | `ocr` | pytesseract + CLAHE + sharpening | Text-based element finding |
 | `feature` | ORB keypoints | Rotation/scale invariant |
-| `vision_ai` | Claude Vision API | Canvas/CanvasKit text, complex UIs |
+| `vision_ai` | Claude/OpenAI/Gemini Vision | Canvas text, complex UIs |
 
 ## Action-Value Requirements
 
