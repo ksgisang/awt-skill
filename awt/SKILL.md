@@ -147,6 +147,48 @@ aat validate scenarios/ --strict
 # Warns: missing assertions, hardcoded URLs, empty descriptions
 ```
 
+## Scenario Authoring Protocol (MUST follow)
+
+**Before writing any scenario, follow this procedure:**
+
+### Step 1: Analyze source code
+- Read the routing/navigation structure of the target app
+- Identify actual widget text, button labels, and Semantics labels from source
+- For Flutter: check `Semantics(label: ...)`, `Text(...)`, `ElevatedButton(child: Text(...))` in the code
+
+### Step 2: Draft scenario and confirm with user
+Before running `aat run`, show the scenario to the user:
+```
+Below is the test scenario I'll execute. Please review and approve:
+
+SC-001: Login Flow
+  1. navigate → https://app.example.com
+  2. find_and_click → "Login" (region: main)
+  3. find_and_type → "Email" → test@example.com
+  4. find_and_click → "Submit" (region: main)
+  5. assert_text → "Welcome" (region: main)
+
+Approve? [Y/n]
+```
+
+### Step 3: Execute only after approval
+- User approves → `aat run --skill-mode scenarios/`
+- User requests changes → modify scenario and re-confirm
+- **Never run tests without showing the scenario first**
+
+### Step 4: Session reuse for authenticated flows
+```yaml
+# First run: login + save session
+- action: save_session
+  name: "my_app_login"
+  description: "Save login session"
+
+# Subsequent runs: load session (skips login if valid)
+- action: load_session
+  name: "my_app_login"
+  description: "Restore login session (auto-expires after 24h)"
+```
+
 ## Quick Start
 
 ```bash
