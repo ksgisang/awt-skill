@@ -618,13 +618,23 @@ target:
 
 **6. Flutter/Canvas SPA** — Flutter Web renders text on Canvas, not DOM. AWT automatically detects Flutter CanvasKit and activates **Flutter Semantics** matching — reads `flt-semantics` aria-labels and ARIA roles directly, bypassing OCR entirely.
 
-**How it works:** Flutter's Semantics framework creates accessibility nodes (`flt-semantics` elements with `aria-label`). AWT queries these via Playwright before falling back to OCR. This is faster and more accurate than OCR for Flutter apps.
+**Semantics auto-activation:** After every `navigate` step on a Flutter page, AWT automatically:
+1. Clicks `flt-semantics-placeholder` (triggers Flutter's SemanticsBinding)
+2. Waits up to 3 seconds for `flt-semantics` nodes to appear
+3. Retries up to 3 times if nodes don't appear
+4. Logs result: `[AWT] Flutter Semantics activated (N nodes)` or `→ OCR fallback`
+
+No manual configuration needed — Semantics activates silently on Flutter, and is skipped entirely on non-Flutter apps.
 
 **Matching priority on Flutter CanvasKit:**
 1. CSS selector (if provided)
-2. **Flutter Semantics** (auto-activated, no config needed)
+2. **Flutter Semantics** (auto-activated after navigate)
 3. Playwright text search
 4. OCR (3-tier: template → Tesseract → Vision AI)
+
+**After page transitions** (login → dashboard, tab switches), Semantics re-activates automatically. If a `find_and_click` navigates to a new page, the next `find_and_click` will detect the new page and re-activate.
+
+**Debugging Semantics:** Use browser DevTools → Elements → search for `flt-semantics` to see all available aria-labels. If a widget doesn't have a Semantics label, add `Semantics(label: 'Button Name')` in the Flutter source code.
 
 ```yaml
 # find_and_click automatically uses Semantics on Flutter
