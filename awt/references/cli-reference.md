@@ -67,6 +67,29 @@ aat generate --from <file> [--config PATH] [--output DIR]
 - AI reads document and produces scenario YAML files
 - Default output: `scenarios/` directory
 
+## Scanning
+
+### `aat scan`
+Scan a URL and collect UI elements for scenario authoring.
+
+```bash
+aat scan --url <URL> [OPTIONS]
+```
+
+| Option | Short | Default | Description |
+|--------|-------|---------|-------------|
+| `--url` | `-u` | required | URL to scan |
+| `--compare` | — | — | Previous scan_result.json to diff against |
+| `--config` | `-c` | auto-detect | Config file path |
+
+Output: `.aat/scan_result.json` with elements (label, type, selector, x, y, source)
+
+### `aat hook install`
+Install post-commit git hook for auto-scan on UI file changes.
+
+### `aat hook uninstall`
+Remove AWT post-commit hook.
+
 ## Test Execution
 
 ### `aat run`
@@ -82,8 +105,10 @@ aat run <scenarios_path> [OPTIONS]
 | `--slow-mo` | — | `100` (headed) | Slow down actions by N ms |
 | `--learn` | — | `false` | Learn from fixes (record healed steps) |
 | `--skill-mode` | — | `false` | Output structured diagnosis for AI coding assistants |
+| `--debug` | — | `false` | Enable debug logging (OCR candidates, matcher details) |
+| `--strict` | — | `false` | Treat skipped steps as failures (exit code 1) |
 
-- Exit code 0 if all pass, 1 if any fail
+- Exit code: 0 = all pass, 1 = failed, 2 = critical failure
 - `--skill-mode` outputs `=== AWT SKILL DEVQA ===` block on failure for AI parsing
 - Tracks attempt count across runs (resets on success or different scenario)
 
