@@ -36,9 +36,37 @@ which aat || (pip install aat-devqa && playwright install chromium)
 
 ---
 
-## Full Automation Loop
+## How to Test (Single Command)
 
-When the user says **"test it"** or **"테스트해줘"**, follow this exact loop. Zero user intervention except where noted.
+When the user says **"test it"**, **"테스트해줘"**, or any testing request:
+
+```bash
+aat devqa "test description"
+```
+
+That's it. AWT handles everything automatically:
+1. Detects running app URL (localhost port scan)
+2. Scans page elements (DOM + Semantics + OCR)
+3. Generates scenario from scan data
+4. Shows scenario, 10s auto-proceed
+5. Executes with real-time progress
+6. On failure: re-scans, fixes, retries (max 5)
+7. On success: verifies final screenshot
+
+**The AI coding assistant only runs `aat devqa`. No other steps needed.**
+
+Examples:
+```bash
+aat devqa "login and dashboard test"
+aat devqa "회원가입 테스트"
+aat devqa "image generation flow" --url http://localhost:8080
+```
+
+---
+
+## Manual Control (Advanced)
+
+For fine-grained control, use individual commands instead of `aat devqa`:
 
 ### Step 1: Detect App URL
 
@@ -282,6 +310,7 @@ When a test fails, trace to the source code:
 
 | Command | Description |
 |---------|-------------|
+| `aat devqa "description"` | **Full auto loop**: scan → generate → test → fix → retry |
 | `aat scan --url URL` | Scan page, collect elements to scan_result.json |
 | `aat run --skill-mode PATH` | Execute with structured output for AI |
 | `aat run --debug PATH` | Execute with OCR candidate debug logs |
