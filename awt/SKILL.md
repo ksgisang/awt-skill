@@ -24,9 +24,10 @@ AWT (AI Watch Tester) gives your AI coding tool the ability to **see and interac
 
 ## CRITICAL RULES
 
-1. **NEVER set `headless: true`** — users MUST see the browser
-2. **NEVER guess element names** — always use `aat scan` data
-3. **NEVER run tests without scanning first** — scan → scenario → run
+1. **ALWAYS use `aat devqa`** — this is the ONLY command for testing. It auto-scans, generates scenarios, runs tests, and fixes failures. Do NOT call `aat run`, `aat scan`, or `aat generate` separately.
+2. **NEVER call `aat run` directly** — it skips scanning and uses stale/guessed data. Always `aat devqa`.
+3. **NEVER set `headless: true`** — users MUST see the browser.
+4. **NEVER guess element names** — `aat devqa` scans first and uses real data.
 
 ## Auto-Setup
 
@@ -36,30 +37,35 @@ which aat || (pip install aat-devqa && playwright install chromium)
 
 ---
 
-## How to Test (Single Command)
+## How to Test
 
-When the user says **"test it"**, **"테스트해줘"**, or any testing request:
+When the user asks to test anything, run **exactly one command**:
 
 ```bash
 aat devqa "test description"
 ```
 
-That's it. AWT handles everything automatically:
+**DO NOT** run `aat run`, `aat scan`, or `aat generate` separately. Only `aat devqa`.
+
+`aat devqa` does everything automatically:
 1. Detects running app URL (localhost port scan)
 2. Scans page elements (DOM + Semantics + OCR)
-3. Generates scenario from scan data
+3. Generates scenario from real scan data (no guessing)
 4. Shows scenario, 10s auto-proceed
 5. Executes with real-time progress
 6. On failure: re-scans, fixes, retries (max 5)
 7. On success: verifies final screenshot
-
-**The AI coding assistant only runs `aat devqa`. No other steps needed.**
 
 Examples:
 ```bash
 aat devqa "login and dashboard test"
 aat devqa "회원가입 테스트"
 aat devqa "image generation flow" --url http://localhost:8080
+```
+
+**If the URL is already known:**
+```bash
+aat devqa "login test" --url http://localhost:3000
 ```
 
 ---
