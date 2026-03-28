@@ -1,6 +1,6 @@
 ---
 name: awt
-version: 1.4.0
+version: 1.5.0
 description: AI-powered E2E web app testing with self-healing DevQA loop. Generate test scenarios from URLs or natural language, execute with Playwright, auto-fix failures. Supports YAML scenarios, visual matching (OpenCV + OCR), pattern learning. Use for QA, bug detection, regression testing.
 ---
 
@@ -22,12 +22,99 @@ AWT (AI Watch Tester) gives your AI coding tool the ability to **see and interac
 - Performance/load testing (use k6, Artillery)
 - Mobile native app testing (web and desktop only)
 
-## CRITICAL RULES
+## ⛔ CRITICAL RULES — READ BEFORE DOING ANYTHING
 
-1. **ALWAYS use `aat devqa`** — this is the ONLY command for testing. It auto-scans, generates scenarios, runs tests, and fixes failures. Do NOT call `aat run`, `aat scan`, or `aat generate` separately.
-2. **NEVER call `aat run` directly** — it skips scanning and uses stale/guessed data. Always `aat devqa`.
-3. **NEVER set `headless: true`** — users MUST see the browser.
-4. **NEVER guess element names** — `aat devqa` scans first and uses real data.
+1. **NEVER use `-y` or `--auto-approve`** — the user MUST approve before any test runs.
+2. **NEVER use `aat devqa`** — it runs the entire pipeline without user checkpoints. Always use the 4-step workflow below.
+3. **NEVER run a test without showing the scenario to the user first** and getting explicit approval (e.g. "진행해", "go ahead", "yes", "run it").
+4. **NEVER auto-fix code or scenarios without user permission** — always report failures and ask the user what to do.
+5. **NEVER set `headless: true`** — users MUST see the browser.
+6. **NEVER guess element names** — always scan first and use real data from `scan_result.json`.
+
+---
+
+## ★ MANDATORY 4-STEP WORKFLOW ★
+
+When the user asks to test anything, you MUST follow these 4 steps **in order**. Do NOT skip any step. Do NOT combine steps.
+
+### STEP 1: SCAN — Analyze the target site
+
+```bash
+aat scan --url <URL>
+```
+
+After scanning, **read `.aat/scan_result.json`** and present a summary to the user:
+
+```
+"I scanned http://localhost:3000 and found 83 interactive elements:
+ - 5 input fields (email, password, search, ...)
+ - 12 buttons (Login, Sign Up, Submit, ...)
+ - 15 links (Home, About, Dashboard, ...)
+ 
+ Should I create a test scenario based on these elements?"
+```
+
+**⏸️ WAIT for user response before proceeding to Step 2.**
+
+### STEP 2: GENERATE + PRESENT — Create scenario and show it
+
+Write a YAML scenario using the exact data from `scan_result.json`. Then **show the full scenario to the user**:
+
+```
+"Here is the test scenario I created (5 steps):
+
+ 1. 🌐 Navigate to http://localhost:3000
+ 2. 🖱  Type 'test@example.com' into email field
+ 3. 🖱  Type 'password123' into password field  
+ 4. 🖱  Click 'Login' button (critical)
+ 5. ✅ Verify URL contains '/dashboard'
+
+ Should I run this test? Or would you like me to modify anything?"
+```
+
+**⏸️ WAIT for user approval before proceeding to Step 3.**
+- If user says "modify X" → edit the scenario and show it again
+- If user says "go ahead" / "진행해" / "yes" → proceed to Step 3
+- If user says "cancel" → stop entirely
+
+### STEP 3: EXECUTE — Run the approved scenario
+
+```bash
+aat run --skill-mode --fast scenarios/<scenario>.yaml
+```
+
+Monitor the output. **If any step fails:**
+
+1. **STOP immediately** — do not continue to the next scenario
+2. **Read the failure details** from the AWT output
+3. **Read the SCREENSHOT** if provided in the `=== AWT SKILL DEVQA ===` block
+4. **Report to the user:**
+
+```
+"Test failed at Step 3 (Click Login button):
+ - Error: Element 'Login' not found in DOM
+ - Possible cause: The button text might be 'Sign In' instead of 'Login'
+ - Screenshot: .aat/screenshots/step_003_fail.png
+ 
+ Should I:
+ (a) Fix the scenario (change 'Login' to 'Sign In') and re-test?
+ (b) Fix the source code instead?
+ (c) Skip this step and continue?"
+```
+
+**⏸️ WAIT for user instruction before fixing or re-running.**
+
+### STEP 4: REPORT — Summarize results
+
+When all steps pass, report to the user:
+
+```
+"✅ Test complete: 5/5 steps passed (37.8 seconds)
+ 
+ All navigation links and login flow are working correctly."
+```
+
+---
 
 ## Auto-Setup
 
@@ -37,84 +124,9 @@ which aat || (pip install aat-devqa && playwright install chromium)
 
 ---
 
-## How to Test
+## Scenario YAML Reference
 
-When the user asks to test anything, run **exactly one command**:
-
-```bash
-aat devqa "test description"
-```
-
-**DO NOT** run `aat run`, `aat scan`, or `aat generate` separately. Only `aat devqa`.
-
-`aat devqa` does everything automatically:
-1. Detects running app URL (localhost port scan)
-2. Scans page elements (DOM + Semantics + OCR)
-3. Generates scenario from real scan data (no guessing)
-4. Shows scenario, 10s auto-proceed
-5. Executes with real-time progress
-6. On failure: re-scans, fixes, retries (max 5)
-7. On success: verifies final screenshot
-
-Examples:
-```bash
-aat devqa "login and dashboard test"
-aat devqa "회원가입 테스트"
-aat devqa "image generation flow" --url http://localhost:8080
-```
-
-**If the URL is already known:**
-```bash
-aat devqa "login test" --url http://localhost:3000
-```
-
----
-
-## Manual Control (Advanced)
-
-For fine-grained control, use individual commands instead of `aat devqa`:
-
-### Step 1: Detect App URL
-
-```
-1. Check if a local dev server is running:
-   - curl -s http://localhost:3000 → React/Next.js
-   - curl -s http://localhost:8080 → Vue/Spring
-   - curl -s http://localhost:5000 → Flask/FastAPI
-   - curl -s http://localhost:PORT → any known port
-
-2. If no server found, detect project type and start:
-   - pubspec.yaml → flutter run -d chrome --web-port=8080
-   - package.json → npm start / yarn dev
-   - manage.py → python manage.py runserver
-
-3. If URL detection fails → ask user:
-   "What URL should I test? (e.g., http://localhost:3000)"
-```
-
-### Step 2: Scan (aat scan)
-
-```bash
-aat scan --url {detected_url}
-```
-
-This captures:
-- Full-page screenshot
-- All interactive elements (buttons, inputs, links)
-- DOM selectors + coordinates + bounding boxes
-- Flutter: Semantics labels (auto-activated)
-- OCR: visible text positions
-
-Output: `.aat/scan_result.json` — **this is the source of truth for scenario writing**.
-
-If `scan_result.json` already exists:
-```bash
-aat scan --url {url} --compare .aat/scan_result.json
-```
-- No changes → reuse existing data
-- Changes detected → use new scan
-
-### Step 3: Write Scenario from Scan Data
+### Writing Scenarios from scan_result.json
 
 **Read `.aat/scan_result.json`** and write YAML using the exact element data:
 
@@ -158,64 +170,6 @@ steps:
 - Use `region: main` for all clicks (avoid nav panel False Positives)
 - Mark login/auth steps as `critical: true`
 - Add `assert_url` after navigation-triggering clicks
-- **First time only**: show scenario to user for approval
-
-### Step 4: Execute
-
-```bash
-aat run --skill-mode scenarios/SC-001.yaml
-```
-
-Output format:
-```
-[AWT] Test started: SC-001 (12 steps)
-[AWT] ✅ 1/12 Go to login page
-[AWT] ✅ 2/12 Enter email
-[AWT] ❌ 3/12 Click login button (critical)
-[AWT] 🛑 Test stopped — Login failed
-```
-
-### Step 5: Fix and Retry
-
-On failure:
-1. **Read the SCREENSHOT** file from the `=== AWT SKILL DEVQA ===` block
-2. **Re-scan** if element positions may have changed:
-   ```bash
-   aat scan --url {url} --compare .aat/scan_result.json
-   ```
-3. **Fix ONE step** in the scenario YAML
-4. **Comment the fix**: `# Fixed: button text changed from "Login" to "Sign In"`
-5. **Re-run**: `aat run --skill-mode scenarios/SC-001.yaml`
-6. **Never repeat the same fix** — if tried before, try a different approach
-7. **Max 5 attempts** (tracked by ATTEMPTS counter)
-
-If the failure is a **source code bug** (not a scenario issue):
-1. Trace from failed URL → route handler → component → fix code
-2. Rebuild the app
-3. Re-scan + re-run
-
-### Step 6: Verify Success
-
-When all steps pass, parse the `=== AWT SKILL VERIFY ===` block:
-- **Read FINAL_SCREENSHOT** to confirm correct page
-- Check **NAV_ZONE_WARNINGS** — clicks in left 20% may be False Positives
-- If wrong page → fix scenario → retry
-- If correct → report to user:
-  ```
-  "Test complete: 12/12 passed (2 attempts)"
-  ```
-
-### Step 7: On Repeated Failure (3+ attempts)
-
-Report to user:
-- Which step keeps failing
-- What fixes were attempted
-- Whether the issue is in the scenario or application code
-- Suggest manual investigation with `aat scan` screenshot
-
----
-
-## YAML Reference
 
 ### Actions (21 types)
 
@@ -305,10 +259,10 @@ When a test fails, trace to the source code:
 1. **Read test output** — which step, what error, what URL
 2. **Search codebase** — grep for the expected text, URL route, component
 3. **Read the component** — find why it doesn't render/redirect/respond
-4. **Fix the code** — propose a concrete diff
-5. **Re-build + re-scan + re-test**
+4. **Propose a fix to the user** — show a concrete diff, ask for approval
+5. **After user approves** — apply fix, re-build, re-scan, re-test
 
-**Key principle:** You have full access to the project source code. Use Grep, Glob, and Read tools aggressively.
+**Key principle:** NEVER auto-apply fixes. Always show the diff and ask.
 
 ---
 
@@ -316,13 +270,12 @@ When a test fails, trace to the source code:
 
 | Command | Description |
 |---------|-------------|
-| `aat devqa "description"` | **Full auto loop**: scan → generate → test → fix → retry |
 | `aat scan --url URL` | Scan page, collect elements to scan_result.json |
 | `aat run --skill-mode PATH` | Execute with structured output for AI |
+| `aat run --skill-mode --fast PATH` | Execute in fast DOM-only mode (Next.js, React, etc.) |
 | `aat run --debug PATH` | Execute with OCR candidate debug logs |
 | `aat doctor` | Check environment |
 | `aat setup` | Configure AI + Vision providers |
-| `aat hook install` | Auto-scan on git commit |
 | `aat validate PATH` | Validate YAML scenarios |
 | `aat cost` | View AI API costs |
 
@@ -330,10 +283,17 @@ When a test fails, trace to the source code:
 
 ```
 --skill-mode    Structured output for AI assistants
+--fast          DOM-only matching (skip Vision/OCR — fastest for standard web apps)
 --debug         Show OCR candidates and matcher details
 --strict        Treat skipped steps as failures
 --learn         Record healed steps for pattern learning
 --slow-mo N     Slow down actions by N ms
+```
+
+### ⛔ Banned Flags (NEVER use these)
+
+```
+-y / --auto-approve    Bypasses user approval — NEVER USE
 ```
 
 ---
@@ -347,7 +307,7 @@ When a test fails, trace to the source code:
 5. **Use `save_session`/`load_session`** — skip login on repeated runs
 6. **Read screenshots on failure** — the SCREENSHOT path is a real PNG file
 7. **One fix per retry** — change only the failing step
-8. **Use `aat hook install`** — auto-detect UI changes on commit
+8. **Always ask user before fixing** — never auto-modify code or scenarios
 
 ## AI Providers (for Vision AI Tier 3)
 
