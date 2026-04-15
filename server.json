@@ -1,0 +1,30 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.ksgisang/awt",
+  "title": "AWT (AI Watch Tester)",
+  "description": "AI-powered E2E testing MCP server. Detects and auto-fixes UI bugs via DevQA Loop and Vision AI.",
+  "version": "1.6.2",
+  "repository": {
+    "url": "https://github.com/ksgisang/awt-skill",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "aat-devqa",
+      "version": "1.6.2",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "ANTHROPIC_API_KEY",
+          "description": "Anthropic API key for Claude AI integration",
+          "isRequired": true,
+          "isSecret": true,
+          "format": "string"
+        }
+      ]
+    }
+  ]
+}
