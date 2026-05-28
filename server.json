@@ -19,8 +19,15 @@
       "environmentVariables": [
         {
           "name": "ANTHROPIC_API_KEY",
-          "description": "Anthropic API key for Claude AI integration",
-          "isRequired": true,
+          "description": "Anthropic API key (optional — required only when using provider=claude)",
+          "isRequired": false,
+          "isSecret": true,
+          "format": "string"
+        },
+        {
+          "name": "OPENAI_API_KEY",
+          "description": "OpenAI API key (optional — required only when using provider=openai)",
+          "isRequired": false,
           "isSecret": true,
           "format": "string"
         }
