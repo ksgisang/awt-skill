@@ -191,7 +191,7 @@ steps:
 
 <!-- BEGIN GENERATED: actions -->
 
-### Actions (26 types)
+### Actions (27 types)
 
 | Category | Actions |
 |----------|---------|
@@ -201,7 +201,7 @@ steps:
 | Direct | `click_at`, `type_text`, `press_key`, `key_combo` |
 | Assert | `assert`, `assert_text`, `assert_screen_changed`, `assert_url` |
 | Session | `save_session`, `load_session` |
-| Input | `upload_file` |
+| Input | `upload_file`, `select_option` |
 | Control flow | `if_visible`, `include` |
 | Query | `find`, `get_text` |
 | Utility | `wait`, `screenshot`, `scroll` |

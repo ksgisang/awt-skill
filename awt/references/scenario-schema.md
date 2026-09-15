@@ -99,7 +99,7 @@ failing teardown step is logged and does not change the test result.
 | `command` | string \| null | No | `null` | Shell command (supports {{variables}}) |
 | `timeout` | int \| null | No | `30` | Shell command timeout in seconds |
 
-## ActionType (26 values)
+## ActionType (27 values)
 
 **Navigation**
 
@@ -140,6 +140,7 @@ failing teardown step is logged and does not change the test result.
 **Input**
 
 - `upload_file` — Attach a file to a file input; needs `file_path` or `file_paths`
+- `select_option` — Pick an option in a native `<select>`; needs `target.selector`
 
 **Control flow**
 
@@ -183,6 +184,7 @@ but not enforced by the validators, so `aat validate` lets them through.
 | `save_session` | — | optional | Session name, if `name` is not used | Save cookies and storage under a name |
 | `load_session` | — | optional | Session name, if `name` is not used | Restore a saved session |
 | `upload_file` | optional | optional | Selector, if `target.selector` is not used | Attach a file to a file input; needs `file_path` or `file_paths` |
+| `select_option` | required | required | Option label, then value, then index — first match wins | Pick an option in a native `<select>`; needs `target.selector` |
 | `if_visible` | required ⚠ | — | — | Run the `then` sub-steps only if the target is visible |
 | `include` | — | optional | Scenario path, if `scenario` is not used | Inline another scenario file |
 | `find` | required | — | — | Locate an element without clicking it; pairs with `save_as` |
