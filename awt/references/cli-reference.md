@@ -112,6 +112,15 @@ aat run <scenarios_path> [OPTIONS]
 - `--skill-mode` outputs `=== AWT SKILL DEVQA ===` block on failure for AI parsing
 - Tracks attempt count across runs (resets on success or different scenario)
 
+**The approval gate.** Without `--skill-mode`, `aat run` shows the scenario and
+waits for a keypress before opening the browser — Enter to run, `e` to edit the
+YAML, `n` to cancel (exit 0). The prompt reads `/dev/tty`, not stdin, so piping
+input at it does nothing; only the person at the terminal can answer. There is no
+flag that skips it. `--skill-mode` does not skip it either — it means approval
+already happened when the user approved your tool call, which is why you must
+show the scenario and get a real "yes" first. Every attempt, approved or
+cancelled, is appended to `.aat/audit.log`.
+
 The DEVQA block carries these fields:
 
 | Field | Meaning |
