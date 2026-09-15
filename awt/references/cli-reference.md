@@ -112,6 +112,25 @@ aat run <scenarios_path> [OPTIONS]
 - `--skill-mode` outputs `=== AWT SKILL DEVQA ===` block on failure for AI parsing
 - Tracks attempt count across runs (resets on success or different scenario)
 
+The DEVQA block carries these fields:
+
+| Field | Meaning |
+|---|---|
+| `SCENARIO` | Scenario file that failed |
+| `FAILED_STEP` | Step number and action |
+| `ERROR` | The step's own `message`, i.e. what the author expected |
+| `ACTUAL_CAUSE` | What actually went wrong — present only when it differs from `ERROR` |
+| `SCREENSHOT` | Path to the failure screenshot |
+| `URL`, `PAGE_TITLE` | Where the browser was when it failed |
+| `CATEGORY` | Failure class (`element_not_found`, `timeout`, `auth_error`, ...) |
+| `POSSIBLE_CAUSE` | Generic hint derived from `CATEGORY` |
+| `CRITICAL_FAILURE`, `EFFECT` | Present when a critical step stopped the run |
+| `FIX_TARGET`, `RETRY_CMD`, `ATTEMPTS` | What to edit, how to re-run, how many tries so far |
+
+**Diagnose from `ACTUAL_CAUSE` when it is present.** `ERROR` is a label the
+scenario author wrote before the run, so taking it as the cause can invert the
+diagnosis entirely.
+
 ### `aat loop`
 Execute DevQA healing loop.
 

@@ -87,8 +87,9 @@ Monitor the output. **If any step fails:**
 
 1. **STOP immediately** — do not continue to the next scenario
 2. **Read the failure details** from the AWT output
-3. **Read the SCREENSHOT** if provided in the `=== AWT SKILL DEVQA ===` block
-4. **Report to the user:**
+3. **Read `ACTUAL_CAUSE` first** if the `=== AWT SKILL DEVQA ===` block has one — see below
+4. **Read the SCREENSHOT** if provided in the same block
+5. **Report to the user:**
 
 ```
 "Test failed at Step 3 (Click Login button):
@@ -101,6 +102,23 @@ Monitor the output. **If any step fails:**
  (b) Fix the source code instead?
  (c) Skip this step and continue?"
 ```
+
+#### `ERROR` vs `ACTUAL_CAUSE` — do not mix them up
+
+On a critical failure the block can carry two lines:
+
+```
+ERROR: Dashboard must load after login
+ACTUAL_CAUSE: Bounced to the login page: https://app.example.com/login?next=/dashboard
+```
+
+`ERROR` is the scenario author's description of what *should* have happened. It is
+a label written before the run, not a finding. `ACTUAL_CAUSE` is what the browser
+actually did. **Diagnose from `ACTUAL_CAUSE`**; treating `ERROR` as the cause
+produces exactly the wrong diagnosis (here: "the dashboard is broken", when the
+truth is that the session was never established).
+
+When `ACTUAL_CAUSE` is absent, `ERROR` already holds the real reason.
 
 **⏸️ WAIT for user instruction before fixing or re-running.**
 
@@ -171,17 +189,26 @@ steps:
 - Mark login/auth steps as `critical: true`
 - Add `assert_url` after navigation-triggering clicks
 
-### Actions (21 types)
+<!-- BEGIN GENERATED: actions -->
+
+### Actions (26 types)
 
 | Category | Actions |
 |----------|---------|
 | Navigation | `navigate`, `go_back`, `refresh` |
-| Find + Mouse | `find_and_click`, `find_and_double_click`, `find_and_right_click` |
-| Find + Keyboard | `find_and_type`, `find_and_clear` |
-| Direct | `click_at`, `type_text` (supports `verify: true`), `press_key`, `key_combo` |
+| Find + mouse | `find_and_click`, `find_and_double_click`, `find_and_right_click` |
+| Find + keyboard | `find_and_type`, `find_and_clear` |
+| Direct | `click_at`, `type_text`, `press_key`, `key_combo` |
 | Assert | `assert`, `assert_text`, `assert_screen_changed`, `assert_url` |
 | Session | `save_session`, `load_session` |
+| Input | `upload_file` |
+| Control flow | `if_visible`, `include` |
+| Query | `find`, `get_text` |
 | Utility | `wait`, `screenshot`, `scroll` |
+
+See `references/scenario-schema.md` for what each action needs.
+
+<!-- END GENERATED: actions -->
 
 ### Key Step Options
 
@@ -208,6 +235,31 @@ steps:
   message: "Login failed"
   description: "Verify redirect"
 ```
+
+### Access-control tests: `expect_login_redirect`
+
+AWT normally treats "we ended up on a login page" as a hard stop, because for most
+scenarios it means the session died. An access-control test wants the opposite:
+being bounced to `/login` **is** the passing outcome. Mark those steps:
+
+```yaml
+- step: 2
+  action: navigate
+  value: "{{url}}/admin"
+  expect_login_redirect: true     # landing on /login here is expected
+  description: "Open an admin page while signed out"
+
+- step: 3
+  action: assert_url
+  value: "/login"
+  expect_login_redirect: true
+  description: "Verify the guest was sent to the login page"
+```
+
+Set it per step. The same field exists at scenario level, but it switches the
+detection off for every step in the file, so use it only when the whole scenario
+is about access control. Omitting the field keeps the default behaviour: a step
+that does not say it expects a login redirect still hard-stops on one.
 
 ### Session Reuse
 
