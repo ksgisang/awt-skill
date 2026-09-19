@@ -141,6 +141,12 @@ When all steps pass, report to the user:
  All navigation links and login flow are working correctly."
 ```
 
+If the user wants something to keep or to hand to someone else, add
+`--report pdf` to the run. It writes `reports/<scenario id>/report.pdf`, with
+every step listed and the screenshots of failed and warned steps embedded in the
+file, and prints the path. Do not add it by default: most runs are read in the
+terminal and a report nobody asked for is a file nobody opens.
+
 ---
 
 ## Auto-Setup
@@ -352,6 +358,7 @@ When a test fails, trace to the source code:
 | `aat run --skill-mode PATH` | Execute with structured output for AI |
 | `aat run --skill-mode --fast PATH` | Execute in fast DOM-only mode (Next.js, React, etc.) |
 | `aat run --debug PATH` | Execute with OCR candidate debug logs |
+| `aat run --report pdf PATH` | Execute and write a PDF report per scenario (failure screenshots embedded) |
 | `aat doctor` | Check environment |
 | `aat setup` | Configure AI + Vision providers |
 | `aat validate PATH` | Validate YAML scenarios |
@@ -369,6 +376,7 @@ When a test fails, trace to the source code:
 --learn         Record healed steps for pattern learning
 --no-learn      Neither use nor update remembered coordinates in this run
 --slow-mo N     Slow down actions by N ms
+--report FMT    Write a report per scenario: pdf | markdown (omit for none)
 ```
 
 ### ⛔ Banned Flags (NEVER use these)

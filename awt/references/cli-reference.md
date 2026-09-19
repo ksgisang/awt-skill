@@ -108,7 +108,14 @@ aat run <scenarios_path> [OPTIONS]
 | `--debug` | — | `false` | Enable debug logging (OCR candidates, matcher details) |
 | `--strict` | — | `false` | Treat skipped steps as failures (exit code 1) |
 | `--no-learn` | — | `false` | Neither use nor update remembered coordinates in this run |
+| `--report` | — | none | Write a report per scenario: `pdf` or `markdown` |
 
+- `--report pdf` writes `reports/<scenario id>/report.pdf` (and the `report.html`
+  it was printed from). Screenshots of failed and warned steps are embedded in
+  the file, so the report can be sent on its own. A run whose steps all passed
+  but carries a warning is titled `PASS WITH WARNINGS`, never `PASS`.
+- A report that cannot be written is reported on stderr and never changes the
+  exit code: the code reflects the test, not the paperwork.
 - Exit code: 0 = all pass, 1 = failed, 2 = critical failure, 3 = warnings only
 - A click that changed nothing on screen is reported as `WARNING`, not `PASSED`:
   it ran, but it almost certainly missed its target. Read the screenshot for
@@ -160,6 +167,7 @@ aat loop <scenarios_path> [OPTIONS]
 | `--config` | `-c` | auto-detect | Config file path |
 | `--max-loops` | `-m` | `10` | Maximum iterations (1–100) |
 | `--approval-mode` | `-a` | `manual` | `manual` / `branch` / `auto` |
+| `--report-format` | — | `markdown` | Loop report format: `markdown` or `pdf` |
 
 **Approval Modes:**
 - `manual` — Prompts in terminal, shows fix suggestion, no file changes
