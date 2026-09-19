@@ -147,6 +147,11 @@ every step listed and the screenshots of failed and warned steps embedded in the
 file, and prints the path. Do not add it by default: most runs are read in the
 terminal and a report nobody asked for is a file nobody opens.
 
+Add `--report-screenshots all` when the user wants to see the steps that worked
+— a hand-off or a record of a clean run. With the default only failed and warned
+steps bring their screenshots, so a report of a run where nothing went wrong
+contains no images at all.
+
 ---
 
 ## Auto-Setup
@@ -377,6 +382,8 @@ When a test fails, trace to the source code:
 --no-learn      Neither use nor update remembered coordinates in this run
 --slow-mo N     Slow down actions by N ms
 --report FMT    Write a report per scenario: pdf | markdown (omit for none)
+--report-screenshots WHICH   Steps the PDF illustrates: failures | all | none
+                             ('all' pictures the steps that worked)
 ```
 
 ### ⛔ Banned Flags (NEVER use these)

@@ -109,11 +109,16 @@ aat run <scenarios_path> [OPTIONS]
 | `--strict` | — | `false` | Treat skipped steps as failures (exit code 1) |
 | `--no-learn` | — | `false` | Neither use nor update remembered coordinates in this run |
 | `--report` | — | none | Write a report per scenario: `pdf` or `markdown` |
+| `--report-screenshots` | — | `failures` | Which steps the PDF illustrates: `failures` / `all` / `none` |
 
 - `--report pdf` writes `reports/<scenario id>/report.pdf` (and the `report.html`
   it was printed from). Screenshots of failed and warned steps are embedded in
   the file, so the report can be sent on its own. A run whose steps all passed
   but carries a warning is titled `PASS WITH WARNINGS`, never `PASS`.
+- `--report-screenshots all` embeds every step's screenshot, which is the way to
+  show what worked: with the default a clean run's report has no images at all.
+  `none` keeps the file small. Markdown links its screenshots rather than
+  embedding them, so it ignores this option.
 - A report that cannot be written is reported on stderr and never changes the
   exit code: the code reflects the test, not the paperwork.
 - Exit code: 0 = all pass, 1 = failed, 2 = critical failure, 3 = warnings only
@@ -168,6 +173,7 @@ aat loop <scenarios_path> [OPTIONS]
 | `--max-loops` | `-m` | `10` | Maximum iterations (1–100) |
 | `--approval-mode` | `-a` | `manual` | `manual` / `branch` / `auto` |
 | `--report-format` | — | `markdown` | Loop report format: `markdown` or `pdf` |
+| `--report-screenshots` | — | `failures` | Which steps the PDF illustrates: `failures` / `all` / `none` |
 
 **Approval Modes:**
 - `manual` — Prompts in terminal, shows fix suggestion, no file changes
