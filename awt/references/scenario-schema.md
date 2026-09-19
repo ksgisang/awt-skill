@@ -30,7 +30,7 @@
 | `description` | string | Yes | — | What this step is doing, in the tester's words |
 | `humanize` | bool | No | `true` | Move and type like a person instead of instantly |
 | `method` | FindMethod | No | `auto` | Matching method: auto (3-tier fallback), template, ocr, vision |
-| `learn` | bool | No | `true` | Save successful match to pattern DB for future runs |
+| `learn` | bool \| null | No | `null` | Remember this target (matched position and method) for future runs. Set false for targets whose position follows the content — modal buttons, choice overlays on images, list rows. None = inherit the run-level setting (`aat run --no-learn` turns it off). |
 | `fallback` | bool | No | `true` | Allow tier fallback when specific method fails |
 | `region` | ScreenRegion | No | `full` | Screen region to search: full, top, bottom, left, right, center, main |
 | `threshold` | float | No | `0.05` | Change threshold for assert_screen_changed (0.0-1.0) |
@@ -51,6 +51,7 @@
 | `vars` | dict[string, string] | No | `{}` | Variables to pass to included sub-scenario |
 | `change_threshold` | float \| null | No | `null` | For critical steps: required pixel change ratio (auto-detected if None) |
 | `wait_for` | string \| null | No | `null` | Wait for page load state after action: 'networkidle' \| 'load' \| 'domcontentloaded'. networkidle waits until no network requests for 500ms. |
+| `max_age_min` | int \| null | No | `null` | For load_session: fail this step if the saved session is older than N minutes (the server may have expired it already). |
 | `screenshot_before` | bool | No | `false` | Capture the screen before acting |
 | `screenshot_after` | bool | No | `false` | Capture the screen after acting |
 | `timeout_ms` | int | No | `10000` | How long this step may take, in milliseconds |

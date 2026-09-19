@@ -120,6 +120,15 @@ truth is that the session was never established).
 
 When `ACTUAL_CAUSE` is absent, `ERROR` already holds the real reason.
 
+#### `STATUS: WARNINGS` — a step ran but changed nothing
+
+Exit code 3, with a `=== AWT SKILL VERIFY ===` block listing each warned step.
+The click was performed and did not raise, but not one pixel moved, which almost
+always means it landed next to its target rather than on it. **Do not report
+such a run as passed.** Read the screenshot for the warned step, check the
+target it was given, and tell the user what you found. A warning left unread is
+how a missed click surfaces three steps later as "the product is broken".
+
 **⏸️ WAIT for user instruction before fixing or re-running.**
 
 ### STEP 4: REPORT — Summarize results
@@ -223,8 +232,18 @@ See `references/scenario-schema.md` for what each action needs.
   method: auto                   # auto/semantics/template/ocr/vision
   match_index: 0                 # 0=first match, -1=last
   change_threshold: 0.05         # for critical auto-verification
+  learn: false                   # do not remember this position (see below)
   description: "Click submit"
 ```
+
+**`learn: false` — targets whose position follows the content.** AWT remembers
+where a target was found and reuses that position on later runs when the step
+gives no `selector`. That helps for fixed elements such as login fields, and
+misfires for anything that moves with the content: buttons inside a modal whose
+height follows the text, choice overlays drawn on a question image, rows in a
+list. Mark those `learn: false`. Writing a `selector` is not a substitute — the
+selector wins over the remembered position, but a differently named target is
+still remembered under its new name.
 
 ### assert_url (login/navigation verification)
 
@@ -271,7 +290,14 @@ that does not say it expects a login redirect still hard-stops on one.
 # Load in next run (24h expiry)
 - action: load_session
   name: "my_app_login"
+  max_age_min: 15              # fail here if the saved session is older
 ```
+
+The log says how old the loaded session is ("saved 21 minutes ago").
+`max_age_min` fails at the load step instead: a service that ends idle sessions
+kills a saved one long before the file looks stale, and without the cap that
+shows up several steps later as a login failure, sending everyone to the
+credentials for nothing.
 
 ### Region Parameter
 
@@ -330,6 +356,8 @@ When a test fails, trace to the source code:
 | `aat setup` | Configure AI + Vision providers |
 | `aat validate PATH` | Validate YAML scenarios |
 | `aat cost` | View AI API costs |
+| `aat learned list` | Show remembered coordinates and learned patterns |
+| `aat learn reset "NAME"` | Forget the coordinates remembered for one target (`--all` for every one) |
 
 ### Key Flags
 
@@ -339,6 +367,7 @@ When a test fails, trace to the source code:
 --debug         Show OCR candidates and matcher details
 --strict        Treat skipped steps as failures
 --learn         Record healed steps for pattern learning
+--no-learn      Neither use nor update remembered coordinates in this run
 --slow-mo N     Slow down actions by N ms
 ```
 
@@ -358,6 +387,9 @@ When a test fails, trace to the source code:
 4. **Add `assert_url` after form submits** — verify navigation happened
 5. **Use `save_session`/`load_session`** — skip login on repeated runs
 6. **Read screenshots on failure** — the SCREENSHOT path is a real PNG file
+7. **Mark moving targets `learn: false`** — modal buttons, choice overlays on an
+   image, list rows: their position follows the content, so remembering it makes
+   the next run click empty space
 7. **One fix per retry** — change only the failing step
 8. **Always ask user before fixing** — never auto-modify code or scenarios
 

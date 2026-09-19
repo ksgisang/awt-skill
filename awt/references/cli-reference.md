@@ -107,8 +107,13 @@ aat run <scenarios_path> [OPTIONS]
 | `--skill-mode` | — | `false` | Output structured diagnosis for AI coding assistants |
 | `--debug` | — | `false` | Enable debug logging (OCR candidates, matcher details) |
 | `--strict` | — | `false` | Treat skipped steps as failures (exit code 1) |
+| `--no-learn` | — | `false` | Neither use nor update remembered coordinates in this run |
 
-- Exit code: 0 = all pass, 1 = failed, 2 = critical failure
+- Exit code: 0 = all pass, 1 = failed, 2 = critical failure, 3 = warnings only
+- A click that changed nothing on screen is reported as `WARNING`, not `PASSED`:
+  it ran, but it almost certainly missed its target. Read the screenshot for
+  that step before calling the run good — exit code 3 exists so this cannot
+  pass silently in a pipeline.
 - `--skill-mode` outputs `=== AWT SKILL DEVQA ===` block on failure for AI parsing
 - Tracks attempt count across runs (resets on success or different scenario)
 
@@ -186,8 +191,24 @@ Default: `http://127.0.0.1:8420`
 ### `aat learn add`
 Add a learned element mapping.
 
+### `aat learn reset`
+Forget the coordinates AWT remembered for a target.
+
+```bash
+aat learn reset "채점"      # one target, by name or selector
+aat learn reset --all      # every remembered coordinate
+aat learn --reset "채점"    # same thing, as an option on the group
+```
+
+A remembered position is only a fallback for targets the scenario did not name
+with a selector, but a stale one keeps a step clicking an empty spot. Reset it
+after the UI moves. Targets whose position follows the content — modal buttons,
+choice overlays drawn on an image, list rows — are better marked
+`learn: false` on the step so nothing is remembered in the first place.
+
 ### `aat learned list`
-List all learned element mappings.
+List all learned element mappings, including remembered coordinates
+(target, page state, position, confidence, use count).
 
 ### `aat learned clear`
 Clear learned element database.
