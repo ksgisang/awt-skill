@@ -368,15 +368,30 @@ credentials for nothing.
 
 AWT automatically detects Flutter CanvasKit and activates Semantics:
 
-1. After `navigate`, clicks `flt-semantics-placeholder` (3 retries, 3s each)
-2. Reads `flt-semantics[aria-label]` for element coordinates
-3. Falls back to OCR if Semantics unavailable
+1. After `navigate`, waits for the app to boot — CanvasKit creates its markers
+   only once its WASM is up, measured at 2.6s while `navigate` returned at 0.4s
+2. Clicks `flt-semantics-placeholder` (3 retries, 3s each)
+3. Waits for late-arriving web fonts and the repaint they cause
+4. Reads `flt-semantics[aria-label]` for element coordinates
+5. Falls back to OCR if Semantics unavailable
+
+**Do not add hand-tuned `wait` steps for Flutter.** Steps 1 and 3 above are what
+those waits were compensating for. A scenario with every `wait` removed passes
+against a real CanvasKit app; a `wait` tuned on one machine breaks on another.
+Add a `wait` only for your app's own startup work (data fetches), not for Flutter.
 
 **Matching priority on Flutter:**
 CSS selector → Flutter Semantics → Playwright text → OCR → Vision AI
 
 **Flutter-specific rules:**
-- Always use `region: main` (Canvas OCR picks up nav text)
+- `find_and_click` / `find_and_type` with `target.text` work — this is the path
+  to use. `target.text` must match the Semantics label, which is often the
+  field's floating label (e.g. `이메일`), not its hint text
+- Avoid CSS selectors and hand-written coordinates — Flutter emits no standard
+  DOM elements, and coordinates break on any reflow
+- `text_visible` reads the canvas with OCR when the text is not in the DOM;
+  configure `matching.ocr_languages` for non-Latin scripts (default `eng+kor`)
+- Use `region: main` when OCR picks up navigation text
 - Use `verify: true` on `type_text` (Canvas input may not render)
 - Add `assert_screen_changed` after clicks
 - Use `method: semantics` to force Semantics lookup
