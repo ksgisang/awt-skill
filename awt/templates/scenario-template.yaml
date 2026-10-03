@@ -42,6 +42,11 @@ steps:
     value: "/expected-path"
     description: "Verify the final URL"
 
-# Do NOT use the scenario-level `expected_result:` field. It is parsed and then
-# ignored -- nothing evaluates it, so the scenario passes without the check
-# having run. Put assertions in `steps:` as above. (references/scenario-schema.md)
+# The scenario-level `expected_result:` field is checked after the last step
+# and before teardown. Write typed entries -- a plain sentence is reported as a
+# warning and the run exits 3, because a sentence describes an outcome and is
+# not a value AWT can look for. (references/scenario-schema.md)
+#
+# expected_result:
+#   - type: url_contains
+#     value: "/expected-path"

@@ -16,40 +16,50 @@
 | `steps` | list[StepConfig] | Yes | — | Ordered steps; at least one is required |
 | `expect_login_redirect` | bool | No | `false` | Landing on a login page is expected throughout this scenario. Inherited by every step that does not set expect_login_redirect itself. Disables login-redirect detection for the whole file — prefer the step-level field unless the entire scenario tests access control. |
 | `teardown` | list[TeardownStep] | No | `[]` | Cleanup steps executed after scenario completes (pass or fail) |
-| `expected_result` | list[ExpectedResult] | No | `[]` | **Parsed and then ignored — nothing evaluates it.** Put assertions in `steps:` instead. See the section below |
+| `expected_result` | list[ExpectedResult] | No | `[]` | Assertions checked once, after the last step and before teardown. An entry written as a plain sentence is reported as a warning instead of checked. See the section below |
 | `variables` | dict[string, string] | No | `{}` | Alias of vars, kept for older scenario files |
 
-### `expected_result` does nothing — use `assert` steps
+### `expected_result` — checked after the last step
 
-Measured, not assumed: the field is loaded, validated, and never read by any
-executor. Whatever you write there is discarded, and the scenario reports
-success without the check having run. The table above used to say
-"checked after the last step", which was simply false; the shipped
-`scenario-template.yaml` still shows the field, and the AI scenario generator
-still fills it in. Treat all three as leftovers.
-
-Put the assertion in a step instead, where it is actually evaluated:
+Each entry is evaluated once the scenario's steps are done and before
+teardown runs, and each one is reported like a step: numbered after the last
+real step, visible on the console, in `last_run.json` and in the report.
 
 ```yaml
-# Not this — silently ignored:
 expected_result:
   - type: url_contains
     value: "/dashboard"
-
-# This — the last step of `steps:`:
-- step: 9
-  action: assert_url
-  value: "/dashboard"
-  description: "the login landed on the dashboard"
 ```
 
-It is not switched on because doing so would fail scenarios that currently
-pass: the loader coerces a free-text item such as `"User sees welcome
-message"` into `text_visible` against that whole sentence, and AI-generated
-scenarios are full of exactly that prose. Turning the field on would therefore
-need the prose cleaned out first. Pinned by
-`tests/integration/test_text_assertions.py` as a strict `xfail`, so
-implementing it announces itself.
+Until recently nothing read this field at all, so whatever was written here
+was discarded and the scenario reported success without the check having run.
+It is evaluated now.
+
+**Write a typed assertion, not a sentence.** The loader accepts a plain
+string and reshapes it into `text_visible`, which is how AI-generated
+scenarios tend to fill the field:
+
+```yaml
+# Not this — a description of an outcome, not a value to look for:
+expected_result:
+  - "User sees the welcome message"
+```
+
+Checking that would demand those exact English words on the page, so AWT does
+not check it — it reports the entry as a **warning** and the run exits with
+code 3. A warning says the check did not happen, which is the honest answer;
+passing it silently was the original defect.
+
+An expectation is scoped to the whole page, because a scenario-level entry has
+no element to point at. Use a step when you need one:
+
+```yaml
+- step: 9
+  action: assert_text
+  target: { selector: "#banner" }
+  value: "Welcome"
+  description: "the banner greets the user by name"
+```
 
 ## StepConfig
 
@@ -113,6 +123,7 @@ At least one of `image`, `text`, `selector` or `icon` is required.
 | `value` | string | Yes | — | Comparison value |
 | `tolerance` | float | No | `0.0` | Allowed deviation for image/screen comparisons |
 | `case_insensitive` | bool | No | `false` | Ignore letter case when comparing |
+| `from_prose` | bool | No | `false` | Set by the loader when the entry was written as a plain sentence instead of a typed assertion. Such an entry is reported as a warning rather than checked: the sentence describes an outcome, it is not a value to look for |
 
 ## TeardownStep
 
