@@ -161,7 +161,13 @@ failing teardown step is logged and does not change the test result.
 
 **Utility**
 
-- `wait` — Wait
+- `wait` — Pause. The value is **milliseconds**, not seconds — `2000` is two seconds, `2` is two milliseconds. Omit it for `1000`.
+  `value: 4` is four milliseconds, which is almost certainly not what was
+  meant. Such a step still tends to pass, because the assertions that
+  follow retry on their own — so the mistake hides behind a green result
+  instead of announcing itself. Under `--verbosity concise` every wait is
+  capped at 100 ms, so a scenario that leans on a long pause behaves
+  differently there than in a default run.
 - `screenshot` — Capture the screen
 - `scroll` — Scroll the page
 
@@ -196,7 +202,7 @@ but not enforced by the validators, so `aat validate` lets them through.
 | `include` | — | optional | Scenario path, if `scenario` is not used | Inline another scenario file |
 | `find` | required | — | — | Locate an element without clicking it; pairs with `save_as` |
 | `get_text` | optional | optional | Selector, if `target.selector` is not used | Read an element's text into a runtime variable via `save_as` |
-| `wait` | — | optional | Milliseconds, e.g. `2000` | Wait |
+| `wait` | — | optional | Milliseconds, e.g. `2000` | Pause. The value is **milliseconds**, not seconds — `2000` is two seconds, `2` is two milliseconds. Omit it for `1000` |
 | `screenshot` | — | — | — | Capture the screen |
 | `scroll` | — | required ⚠ | `x,y,delta` (delta > 0 = down) | Scroll the page |
 
