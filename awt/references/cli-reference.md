@@ -121,7 +121,10 @@ aat run <scenarios_path> [OPTIONS]
   embedding them, so it ignores this option.
 - A report that cannot be written is reported on stderr and never changes the
   exit code: the code reflects the test, not the paperwork.
-- Exit code: 0 = all pass, 1 = failed, 2 = critical failure, 3 = warnings only
+- Exit code: 0 = all pass, 1 = failed, 2 = critical failure, 3 = warnings only,
+  4 = **did not run** (approval needed a terminal and there was none). 0-3 are
+  verdicts about a run that happened; 4 sits outside that range so a pipeline
+  can tell "nothing was tested" from "everything passed"
 - A click that changed nothing on screen is reported as `WARNING`, not `PASSED`:
   it ran, but it almost certainly missed its target. Read the screenshot for
   that step before calling the run good — exit code 3 exists so this cannot
@@ -131,7 +134,9 @@ aat run <scenarios_path> [OPTIONS]
 
 **The approval gate.** Without `--skill-mode`, `aat run` shows the scenario and
 waits for a keypress before opening the browser — Enter to run, `e` to edit the
-YAML, `n` to cancel (exit 0). The prompt reads `/dev/tty`, not stdin, so piping
+YAML, `n` to cancel (exit 0). A process with no terminal cannot be asked at all,
+and that exits **4**, not 0: no step ran, so reporting success would be a lie to
+whatever is reading the code. The prompt reads `/dev/tty`, not stdin, so piping
 input at it does nothing; only the person at the terminal can answer. There is no
 flag that turns the gate off. `--skill-mode` moves it rather than removes it: the
 terminal prompt does not appear, because approval is taken to have happened when
