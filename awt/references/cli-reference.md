@@ -251,6 +251,12 @@ Healing is scoped to the host the picture came from. A picture banked on
 `localhost:3000` will not answer for `staging.example.com`, because a lost heal
 costs one failed step while a wrong one reports a passing test that never ran.
 
+A banked picture is tried before a remembered coordinate. Both are left behind
+by a successful run, but a picture that matches is evidence the element is on
+screen now, while a coordinate is a guess that nothing has moved — so the
+evidence is asked first. This also means a step that heals reports
+`saved_template` rather than `learned`, which is what makes heals countable.
+
 ### `aat learned clear`
 Clear learned data. The database and the pictures are separate stores, so
 clearing one leaves the other alone.
