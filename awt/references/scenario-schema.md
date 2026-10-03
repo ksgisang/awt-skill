@@ -161,20 +161,21 @@ failing teardown step is logged and does not change the test result.
 **Assert**
 
 - `assert` — Check `assert_type` against `expected`
-- `assert_text` — Check that text is **contained** in the page — DOM first, OCR fallback. Substring match; hidden (`display:none`) text still matches.
-  Measured, not assumed: the DOM text engine matches anywhere in `<body>`
-  and does not filter on visibility, so an assertion can pass on a toast
-  or modal the user never saw — pass `target.selector` and assert on a
-  container you know is rendered when that matters. Text that lives only
-  in `<title>` or other `<head>` metadata never matches, because neither
-  the DOM text engine nor OCR can reach it. Being a substring match has a
-  consequence worth stating outright: the right words wrapped in junk
-  pass. A template that leaks its own markup and renders `\(\text{질량}\)`
-  where it should render `질량` satisfies `assert_text: 질량` — the word
-  really is in there. If what you mean is “this element shows exactly this
-  and nothing else”, use `assert_type: text_equals` with a
-  `target.selector`; that is the only assertion AWT offers that fails on
-  the leak.
+- `assert_text` — Check that text is **contained** in the page — DOM first, OCR fallback. Substring match; `display:none` text does not count.
+  Measured, not assumed: the DOM text engine matches anywhere in `<body>`,
+  so an assertion can pass on a toast or modal further down the page than
+  the reader looked — pass `target.selector` when you mean one element. It
+  does require a *rendered* match, though: `display:none` text is in the
+  DOM but satisfies nothing, and a selector naming a non-rendered element
+  fails saying so. Text that lives only in `<title>` or other `<head>`
+  metadata never matches, because neither the DOM text engine nor OCR can
+  reach it. Being a substring match has a consequence worth stating
+  outright: the right words wrapped in junk pass. A template that leaks
+  its own markup and renders `\(\text{질량}\)` where it should render `질량`
+  satisfies `assert_text: 질량` — the word really is in there. If what you
+  mean is “this element shows exactly this and nothing else”, use
+  `assert_type: text_equals` with a `target.selector`; that is the only
+  assertion AWT offers that fails on the leak.
 - `assert_screen_changed` — Check the screen changed by at least `threshold`
 - `assert_url` — Check the current URL contains a substring
 
@@ -230,7 +231,7 @@ but not enforced by the validators, so `aat validate` lets them through.
 | `press_key` | — | required ⚠ | `Enter`, `Tab`, `Escape`, ... | Press a single key |
 | `key_combo` | — | required ⚠ | `Ctrl+A`, `Cmd+C` | Press a key combination |
 | `assert` | — | — | Unused — see `expected` | Check `assert_type` against `expected` |
-| `assert_text` | required | optional | Text to look for, if `target.text` is not used | Check that text is **contained** in the page — DOM first, OCR fallback. Substring match; hidden (`display:none`) text still matches |
+| `assert_text` | required | optional | Text to look for, if `target.text` is not used | Check that text is **contained** in the page — DOM first, OCR fallback. Substring match; `display:none` text does not count |
 | `assert_screen_changed` | — | — | — | Check the screen changed by at least `threshold` |
 | `assert_url` | — | required ⚠ | Substring, e.g. `/dashboard` | Check the current URL contains a substring |
 | `save_session` | — | optional | Session name, if `name` is not used | Save cookies and storage under a name |

@@ -287,9 +287,16 @@ fails. Two things to know about it:
 - **`text_visible` ignores the selector on purpose.** Substring-matching the
   whole page is its job. Reach for `text_equals` when you want narrowing.
 
-Hidden text is a separate blindness and still unfixed: `display:none` text
-lives in the DOM, so `assert_text` matches it. Scope the assertion to a
-container you know is rendered when that matters.
+`assert_text` does **not** accept hidden text. `display:none` text lives in the
+DOM, and that used to be enough to pass — so a notice the code had stopped
+showing went on satisfying the assertion that users could see it. Now a
+selector naming a non-rendered element fails with *"in the DOM but not
+visible"*, and the no-selector path requires a rendered match. A visible copy
+standing behind a hidden one (a stale template above the live view) still
+passes.
+
+If a scenario of yours goes red here, read it as the assertion finally
+answering the question it was written to ask.
 
 ### assert_url (login/navigation verification)
 
