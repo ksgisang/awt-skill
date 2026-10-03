@@ -234,8 +234,13 @@ full chain. `semantics` is activated automatically on Flutter CanvasKit apps.
 
 ## MatchMethod (target-level)
 
+What a report says *found* the element. `playwright`, `learned` and
+`semantics` are produced by the step executor before the matcher chain runs, so
+they appear in results but are not things you pick; `chain_order` ignores them.
+
 | Value | Algorithm | Best for |
 |---|---|---|
+| `playwright` | DOM locator | Selectors and visible text (reported, not chosen) |
 | `learned` | SQLite lookup | Matches that already worked once |
 | `semantics` | Flutter Semantics | Flutter CanvasKit apps |
 | `template` | cv2.matchTemplate | Exact visual matching |
