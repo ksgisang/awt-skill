@@ -219,9 +219,10 @@ aat learn reset --all      # every remembered coordinate
 aat learn --reset "채점"    # same thing, as an option on the group
 ```
 
-A remembered position is only a fallback for targets the scenario did not name
-with a selector, but a stale one keeps a step clicking an empty spot. Reset it
-after the UI moves. Targets whose position follows the content — modal buttons,
+A remembered position is the last thing a step consults — after the selector,
+the input finder, the text search and any banked picture — so it only acts when
+nothing on the page could be located at all. A stale one then keeps the step
+clicking an empty spot. Reset it after the UI moves. Targets whose position follows the content — modal buttons,
 choice overlays drawn on an image, list rows — are better marked
 `learn: false` on the step so nothing is remembered in the first place.
 
@@ -256,6 +257,10 @@ by a successful run, but a picture that matches is evidence the element is on
 screen now, while a coordinate is a guess that nothing has moved — so the
 evidence is asked first. This also means a step that heals reports
 `saved_template` rather than `learned`, which is what makes heals countable.
+The same reasoning puts the coordinate behind every DOM route as well, not just
+behind the selector: a text search that finds the element is an observation too.
+A step that used to pass by clicking a remembered spot may now report
+`playwright` or `saved_template` instead — same click, better reason.
 
 ### `aat learned clear`
 Clear learned data. The database and the pictures are separate stores, so
