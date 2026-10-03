@@ -28,7 +28,20 @@ steps:
       - type: text_visible
         value: "Expected text on screen"
     description: "Verify expected result"
+    # text_visible and assert_text are SUBSTRING matches: the right words
+    # wrapped in junk pass. When the point is *how* something renders, use
+    # text_equals with a selector -- it is the only exact match AWT has:
+    #
+    #   assert_type: text_equals
+    #   value: "질량"
+    #   target:
+    #     selector: "#question"
 
-expected_result:
-  - type: url_contains
+  - step: 4
+    action: assert_url
     value: "/expected-path"
+    description: "Verify the final URL"
+
+# Do NOT use the scenario-level `expected_result:` field. It is parsed and then
+# ignored -- nothing evaluates it, so the scenario passes without the check
+# having run. Put assertions in `steps:` as above. (references/scenario-schema.md)

@@ -256,6 +256,41 @@ list. Mark those `learn: false`. Writing a `selector` is not a substitute — th
 selector wins over the remembered position, but a differently named target is
 still remembered under its new name.
 
+### Text assertions: substring by default, exact only on request
+
+`assert_text` and `assert_type: text_visible` both ask "is this text **in**
+the page?". They are substring matches, so the right words wrapped in junk
+pass. A quiz app that leaked its template and rendered `\(\text{질량}\)`
+where it should have rendered `질량` passed `assert_text: 질량` every time —
+the word really was in there, and the defect was obvious to anyone looking at
+the screen and invisible to every assertion pointed at it.
+
+When the point of the check is *how* something is rendered and not merely that
+it exists, say so with `text_equals` plus a selector:
+
+```yaml
+- step: 3
+  action: assert
+  description: "the question shows the formula, not its LaTeX source"
+  assert_type: text_equals
+  value: "질량"
+  target:
+    selector: "#question"
+```
+
+That compares the element's whole visible text against `value`, so the leak
+fails. Two things to know about it:
+
+- **The selector is what makes it work.** With no selector it compares against
+  the entire visible page, which demands the page contain nothing else. That
+  form is kept for older scenarios; do not write new ones that way.
+- **`text_visible` ignores the selector on purpose.** Substring-matching the
+  whole page is its job. Reach for `text_equals` when you want narrowing.
+
+Hidden text is a separate blindness and still unfixed: `display:none` text
+lives in the DOM, so `assert_text` matches it. Scope the assertion to a
+container you know is rendered when that matters.
+
 ### assert_url (login/navigation verification)
 
 ```yaml
