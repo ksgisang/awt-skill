@@ -361,7 +361,7 @@ When a test fails, trace to the source code:
 |---------|-------------|
 | `aat scan --url URL` | Scan page, collect elements to scan_result.json |
 | `aat run --skill-mode PATH` | Execute with structured output for AI |
-| `aat run --skill-mode --fast PATH` | Execute in fast DOM-only mode (Next.js, React, etc.) |
+| `aat run --skill-mode --fast PATH` | Execute in fast DOM-first mode (Next.js, React, etc.) — a broken selector is still healed from a banked picture |
 | `aat run --debug PATH` | Execute with OCR candidate debug logs |
 | `aat run --report pdf PATH` | Execute and write a PDF report per scenario (failure screenshots embedded) |
 | `aat doctor` | Check environment |
@@ -376,7 +376,9 @@ When a test fails, trace to the source code:
 
 ```
 --skill-mode    Structured output for AI assistants
---fast          DOM-only matching (skip Vision/OCR — fastest for standard web apps)
+--fast          DOM matching, skipping OCR and Vision AI (fastest for standard web
+                apps). A broken selector still gets one deterministic attempt from
+                the picture an earlier run banked for that element.
 --debug         Show OCR candidates and matcher details
 --strict        Treat skipped steps as failures
 --learn         Record healed steps for pattern learning

@@ -237,6 +237,20 @@ took and keeps it, so a later run can still find the element after the selector
 breaks. They are stored per host under `~/.awt/templates/<host>/`, expire after
 30 days, and are capped at 300 per host.
 
+A banked picture is used only after a DOM lookup fails, and only if the store
+already holds a picture for that target on that host — the lookup happens before
+any screenshot is taken, so a run that has banked nothing pays nothing for the
+attempt. `--fast` makes the same attempt: it skips OCR and Vision AI, not
+healing. A step healed this way reports `saved_template` as its match method,
+which is how you tell a heal apart from a scenario that supplied its own
+`target.image`, and `aat cost` and the learned strategies count it separately.
+A heal never re-banks the picture it matched against, so the crop cannot drift
+across runs.
+
+Healing is scoped to the host the picture came from. A picture banked on
+`localhost:3000` will not answer for `staging.example.com`, because a lost heal
+costs one failed step while a wrong one reports a passing test that never ran.
+
 ### `aat learned clear`
 Clear learned data. The database and the pictures are separate stores, so
 clearing one leaves the other alone.

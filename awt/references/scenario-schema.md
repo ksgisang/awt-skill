@@ -244,6 +244,7 @@ they appear in results but are not things you pick; `chain_order` ignores them.
 | `learned` | SQLite lookup | Matches that already worked once |
 | `semantics` | Flutter Semantics | Flutter CanvasKit apps |
 | `template` | cv2.matchTemplate | Exact visual matching |
+| `saved_template` | cv2.matchTemplate on a banked picture | Self-healing: the selector broke and an earlier run's picture found the element |
 | `ocr` | pytesseract + CLAHE | Finding elements by their text |
 | `feature` | ORB keypoints | Rotation- and scale-invariant matching |
 | `vision_ai` | Claude / OpenAI / Gemini Vision | Canvas text, complex UIs |
