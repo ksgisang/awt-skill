@@ -226,11 +226,30 @@ choice overlays drawn on an image, list rows — are better marked
 `learn: false` on the step so nothing is remembered in the first place.
 
 ### `aat learned list`
-List all learned element mappings, including remembered coordinates
-(target, page state, position, confidence, use count).
+List everything AWT remembers: learned element mappings, remembered
+coordinates (target, page state, position, confidence, use count), failure
+patterns, platform tips, and banked element pictures (host, target, crop size,
+age).
+
+Banked pictures are what self-healing matches against. Every step that finds
+its element through the DOM crops that element out of the screenshot it already
+took and keeps it, so a later run can still find the element after the selector
+breaks. They are stored per host under `~/.awt/templates/<host>/`, expire after
+30 days, and are capped at 300 per host.
 
 ### `aat learned clear`
-Clear learned element database.
+Clear learned data. The database and the pictures are separate stores, so
+clearing one leaves the other alone.
+
+```bash
+aat learned clear                               # elements, coordinates, failures, tips
+aat learned clear --templates                   # banked element pictures only
+aat learned clear --templates --host localhost:3000   # one host's pictures
+aat learned clear --templates --yes             # skip the confirmation
+```
+
+Clear the pictures for a host after a redesign: a picture of the old UI is a
+guess dressed as evidence. `AWT_TEMPLATES_DIR` relocates the whole store.
 
 ## Environment Variables
 

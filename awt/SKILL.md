@@ -368,8 +368,9 @@ When a test fails, trace to the source code:
 | `aat setup` | Configure AI + Vision providers |
 | `aat validate PATH` | Validate YAML scenarios |
 | `aat cost` | View AI API costs |
-| `aat learned list` | Show remembered coordinates and learned patterns |
+| `aat learned list` | Show remembered coordinates, learned patterns, and banked element pictures |
 | `aat learn reset "NAME"` | Forget the coordinates remembered for one target (`--all` for every one) |
+| `aat learned clear --templates` | Forget banked element pictures (`--host HOST` for one site) |
 
 ### Key Flags
 
