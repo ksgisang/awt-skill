@@ -129,7 +129,13 @@ failing teardown step is logged and does not change the test result.
 **Assert**
 
 - `assert` — Check `assert_type` against `expected`
-- `assert_text` — Check that text is on screen (DOM first, OCR fallback)
+- `assert_text` — Check that text is in the page — DOM first, OCR fallback. Hidden (`display:none`) text still matches.
+  Measured, not assumed: the DOM text engine matches anywhere in `<body>`
+  and does not filter on visibility, so an assertion can pass on a toast
+  or modal the user never saw — pass `target.selector` and assert on a
+  container you know is rendered when that matters. Text that lives only
+  in `<title>` or other `<head>` metadata never matches, because neither
+  the DOM text engine nor OCR can reach it.
 - `assert_screen_changed` — Check the screen changed by at least `threshold`
 - `assert_url` — Check the current URL contains a substring
 
@@ -179,7 +185,7 @@ but not enforced by the validators, so `aat validate` lets them through.
 | `press_key` | — | required ⚠ | `Enter`, `Tab`, `Escape`, ... | Press a single key |
 | `key_combo` | — | required ⚠ | `Ctrl+A`, `Cmd+C` | Press a key combination |
 | `assert` | — | — | Unused — see `expected` | Check `assert_type` against `expected` |
-| `assert_text` | required | optional | Text to look for, if `target.text` is not used | Check that text is on screen (DOM first, OCR fallback) |
+| `assert_text` | required | optional | Text to look for, if `target.text` is not used | Check that text is in the page — DOM first, OCR fallback. Hidden (`display:none`) text still matches |
 | `assert_screen_changed` | — | — | — | Check the screen changed by at least `threshold` |
 | `assert_url` | — | required ⚠ | Substring, e.g. `/dashboard` | Check the current URL contains a substring |
 | `save_session` | — | optional | Session name, if `name` is not used | Save cookies and storage under a name |
