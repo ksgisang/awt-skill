@@ -30,6 +30,13 @@ AWT (AI Watch Tester) gives your AI coding tool the ability to **see and interac
 4. **NEVER auto-fix code or scenarios without user permission** — always report failures and ask the user what to do.
 5. **NEVER set `headless: true`** — users MUST see the browser.
 6. **NEVER guess element names** — always scan first and use real data from `scan_result.json`.
+7. **NEVER start `aat loop --approval-mode auto`** — it writes AI-generated changes into
+   the user's files and re-tests until the suite is green, with nobody reading them in
+   between. If the user asks for an unattended fixing loop, tell them `--approval-mode
+   branch` does the same thing with every change committed to a throwaway git branch
+   (`git branch -D aat/fix-NNN` undoes it), and let them start it themselves.
+   `--approval-mode manual` (the default) shows a fix but **writes nothing even if you
+   approve it** — do not describe it as having applied anything.
 
 ---
 
@@ -120,6 +127,14 @@ truth is that the session was never established).
 
 When `ACTUAL_CAUSE` is absent, `ERROR` already holds the real reason.
 
+`LOOKED_FOR` names the selector, text or image the step was hunting for — the
+one fact needed to tell "the page is wrong" from "the scenario is pointing at
+something that no longer exists". When `PAGE_TITLE` happens to be that very
+string, a `PAGE_TITLE_NOTE` line appears beside it. Read it: a `<title>` is tab
+metadata, never page text, so it cannot satisfy a text assertion. Without that
+line the block reads as a contradiction and the obvious conclusion — "the text
+is right there, so AWT is broken" — is the wrong one.
+
 #### `STATUS: WARNINGS` — a step ran but changed nothing
 
 Exit code 3, with a `=== AWT SKILL VERIFY ===` block listing each warned step.
@@ -128,6 +143,30 @@ always means it landed next to its target rather than on it. **Do not report
 such a run as passed.** Read the screenshot for the warned step, check the
 target it was given, and tell the user what you found. A warning left unread is
 how a missed click surfaces three steps later as "the product is broken".
+
+A `find_and_type` warning says the text went nowhere: the field was a
+`<select>`, was `readonly` or `disabled`, or was still empty afterwards. The
+message names which and what to use instead — a `<select>` needs
+`action: select_option` with `target.selector`, not typing. Fix the scenario,
+do not re-run it unchanged.
+
+It can also say the text went into the **wrong field**, which is what a long
+form produces. Two shapes, both naming the fields involved:
+
+- *"`'…'` went into `input#suggest`, not into `input#name` which the step
+  named"* — the text landed somewhere else. AWT resolves a text target to the
+  one visible field whose `<label>`, wrapping label or `aria-label` **is** that
+  text before trying placeholder substrings, so a labelled form sends the text
+  where the page says it belongs; this still fires where no label says which
+  box was meant, or where something covers the box.
+- *"… which step 9 already filled for target `'비밀번호'`"* — two steps naming
+  different things wrote into one box, so one of them never got a field.
+
+The fix is the same for both: give those steps a `target.selector`. Do not
+re-run unchanged and do not report the step as passed — on the run that
+produced this, three such steps were counted as passes and the form came back
+*"이름을 입력해주세요."* AWT also logs the ambiguity when it picks between
+candidates, so the warning is usually preceded by a line naming both.
 
 **⏸️ WAIT for user instruction before fixing or re-running.**
 
@@ -141,6 +180,24 @@ When all steps pass, report to the user:
  All navigation links and login flow are working correctly."
 ```
 
+**Never report a step count that includes steps AWT did not count.** When a
+scenario fails partway, the steps after the break are reported as `UNVERIFIED`,
+not `PASSED`, because they ran against a screen the scenario never reached.
+Report them that way:
+
+```
+"❌ Test failed at step 6 of 24.
+
+ Step 6 could not enter the school name — the field is a <select>, so the
+ value never went in and no account was created.
+ The 18 steps after it are UNVERIFIED: they ran against the login screen,
+ so whatever they checked, they did not check it on the signed-up state."
+```
+
+Saying "22 of 24 passed" here is the specific failure this status exists to
+prevent. If the scenario should stop at that step instead of running on, propose
+`critical: true` on it.
+
 If the user wants something to keep or to hand to someone else, add
 `--report pdf` to the run. It writes `reports/<scenario id>/report.pdf`, with
 every step listed and the screenshots of failed and warned steps embedded in the
@@ -151,6 +208,14 @@ Add `--report-screenshots all` when the user wants to see the steps that worked
 — a hand-off or a record of a clean run. With the default only failed and warned
 steps bring their screenshots, so a report of a run where nothing went wrong
 contains no images at all.
+
+**"When did this start failing?" is answered from `.aat/runs/`, not from
+`.aat/last_run.json`.** The pointer file is overwritten every run, so it only
+ever describes the latest one. Each run is also filed under
+`.aat/runs/<timestamp>-<nnn>_<scenarios>.json` with its status tally, newest 50
+kept. Read the two or three files before the current one to say which run a
+step first went red in; without them, "it used to work" is something only the
+user can assert.
 
 ---
 
@@ -362,6 +427,27 @@ credentials for nothing.
 | `bottom` | Bottom 30% | Footer, floating buttons |
 | `center` | Central 60%x60% | Modal dialogs |
 
+### Content below the fold
+
+Every screenshot AWT takes is the viewport, so a target further down the page
+is not in the picture. When a visual lookup fails on the first screen, AWT now
+scrolls and looks again, one screen at a time, and reports the match from the
+frame it was actually found in.
+
+This applies to the paths that read pixels — the matcher chain, self-healing
+from a banked picture, and the `text_visible` OCR fallback. DOM lookups never
+needed it: a CSS selector and `inner_text` already see the whole document.
+
+- **Do not add `scroll` steps just to bring a target into view.** That is what
+  this does, and a hand-tuned scroll amount breaks on a different viewport.
+  Add a `scroll` only when scrolling is part of what you are testing (lazy
+  loading, infinite lists, a sticky header's behaviour).
+- A lookup that finds nothing puts the scroll position back, so a failing step
+  does not move the page out from under the steps after it.
+- The OCR fallback looks a shorter distance than the matcher chain does,
+  because every missed frame costs a full Tesseract pass. For pixel-only text
+  very far down a page, assert on something nearer the top first.
+
 ---
 
 ## Flutter CanvasKit Support
@@ -390,7 +476,9 @@ CSS selector → Flutter Semantics → Playwright text → OCR → Vision AI
 - Avoid CSS selectors and hand-written coordinates — Flutter emits no standard
   DOM elements, and coordinates break on any reflow
 - `text_visible` reads the canvas with OCR when the text is not in the DOM;
-  configure `matching.ocr_languages` for non-Latin scripts (default `eng+kor`)
+  configure `matching.ocr_languages` for non-Latin scripts (default `eng+kor`).
+  It scrolls down a few screens looking for it (see *Content below the fold*),
+  so do not add `scroll` steps to reach canvas text
 - Use `region: main` when OCR picks up navigation text
 - Use `verify: true` on `type_text` (Canvas input may not render)
 - Add `assert_screen_changed` after clicks

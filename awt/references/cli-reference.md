@@ -129,6 +129,39 @@ aat run <scenarios_path> [OPTIONS]
   it ran, but it almost certainly missed its target. Read the screenshot for
   that step before calling the run good — exit code 3 exists so this cannot
   pass silently in a pipeline.
+- Typing is held to the same rule. A `find_and_type` whose field is a `<select>`,
+  `readonly`, `disabled`, or still empty afterwards is a `WARNING`: the step ran
+  and the text went nowhere. The message names which case it was and what to use
+  instead (`<select>` → `action: select_option`).
+- A text target resolves to the one **visible** field whose `<label>`, wrapping
+  label or `aria-label` **is** that text, ahead of the placeholder-substring
+  routes — otherwise `'이름'` goes to a box placeheld `'학교 이름을 입력하세요'`.
+  Two fields sharing the label, or a labelled field that is hidden, make the
+  page silent on which was meant, so the rest of the chain decides as before.
+- Text that went into the **wrong** field anyway is the same `WARNING`, because
+  resolution is not the only way a click reaches a point (an autocomplete panel
+  over the box, a remembered coordinate, `click_at`, a healed template). Two
+  shapes, both naming the fields: *"`'…'` went into `input#suggest`, not into
+  `input#name` which the step named"*, and *"… which step 9 already filled for
+  target `'비밀번호'`"* when two steps naming different things wrote into one box.
+  `target.selector` settles both. AWT also logs the ambiguity when it picks
+  between candidates, so a line naming both fields usually precedes the warning.
+- Deliberately silent in two cases: a field with no authored label
+  (`<label for>`, a wrapping `<label>`, `aria-label`) cannot be checked, because
+  a placeholder is what misdirects the text in the first place; and the text
+  actually typed is never compared against the field's resulting value, so
+  phone masks, `maxlength`, uppercasing and currency formatting stay green.
+- A step that passes *after* an earlier step in the same scenario failed is
+  reported as `UNVERIFIED` and left out of the pass count. It ran against a
+  screen the scenario never reached, so its pass is not evidence — this is what
+  stops a broken run from reporting "22 of 24 passed". The summary says how many
+  there were. It cannot change the exit code (a failure already set it to 1); to
+  stop the scenario at the break instead, mark that step `critical: true`.
+- Every run is kept. `.aat/last_run.json` is overwritten each time and keeps the
+  name and shape it always had, so it still answers "did it pass just now"; the
+  same payload is also filed under `.aat/runs/<timestamp>-<nnn>_<scenarios>.json`
+  with a status tally, which is what answers "when did this turn red". The
+  newest 50 are kept and the oldest are dropped.
 - `--skill-mode` outputs `=== AWT SKILL DEVQA ===` block on failure for AI parsing
 - Tracks attempt count across runs (resets on success or different scenario)
 
@@ -156,6 +189,8 @@ The DEVQA block carries these fields:
 | `ACTUAL_CAUSE` | What actually went wrong — present only when it differs from `ERROR` |
 | `SCREENSHOT` | Path to the failure screenshot |
 | `URL`, `PAGE_TITLE` | Where the browser was when it failed |
+| `LOOKED_FOR` | The selector, text or image the step was hunting for |
+| `PAGE_TITLE_NOTE` | Present only when the page title happens to be the very string the step sought. A `<title>` is tab metadata, not page text, and never satisfies a text assertion — without this line the block reads as a contradiction ("title says X" directly above "X not found") |
 | `CATEGORY` | Failure class (`element_not_found`, `timeout`, `auth_error`, ...) |
 | `POSSIBLE_CAUSE` | Generic hint derived from `CATEGORY` |
 | `CRITICAL_FAILURE`, `EFFECT` | Present when a critical step stopped the run |
@@ -181,9 +216,26 @@ aat loop <scenarios_path> [OPTIONS]
 | `--report-screenshots` | — | `failures` | Which steps the PDF illustrates: `failures` / `all` / `none` |
 
 **Approval Modes:**
-- `manual` — Prompts in terminal, shows fix suggestion, no file changes
-- `branch` — Creates `aat/fix-NNN` git branch, applies fix, commits, retests
-- `auto` — Modifies source files directly, retests immediately
+- `manual` *(default)* — Prompts in terminal and shows the proposed fix. **Answering
+  `y` still writes nothing** — the suggestion is printed, the loop retries, and the
+  same failure comes back. To have an approved fix actually applied, use `branch`.
+- `branch` — **Recommended for unattended runs.** Creates an `aat/fix-NNN` git branch,
+  applies the fix, commits, retests there, and returns to your original branch. Your
+  working tree is untouched; `git branch -D aat/fix-NNN` undoes everything.
+- `auto` — Writes the fix straight into your files and retests. Nobody reads it in
+  between. The run prints a warning saying so before it starts.
+
+**What screening exists** (`branch` and `auto`): AWT refuses a proposed change that
+guts a file, breaks its syntax, or deletes a check (`assert` / `raise` / `throw`, or
+every `if` / `except` / `catch`) without replacing it. Refused files are named in the
+report and never written. This catches vandalism, **not** a plausible-looking fix that
+only stops the test complaining — AWT cannot tell those apart.
+
+**Verdict.** Every loop ends with a two-register summary: a plain-language line
+(what broke, whether it was fixed, how many files changed, how to undo it) followed
+by an indented developer block (iterations, failing steps, written and refused paths,
+branches, commits, report location). When the loop cannot fix it, the plain line says
+so instead of reporting green.
 
 ### `aat start`
 Interactive guided mode — walks through entire workflow.
