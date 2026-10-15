@@ -37,25 +37,50 @@ Your AI coding tool:
 
 ## Installation
 
-### One-line install (recommended)
+Install the `aat` command first — every route below drives it:
+
+```bash
+pip install aat-devqa
+python -m playwright install chromium
+```
+
+### Claude Code plugin (recommended)
+
+This repository is a plugin bundle. It ships the `awt` skill **and** the MCP
+server that exposes the `aat_*` tools, so one install gives you both.
+
+```bash
+claude plugin marketplace add ksgisang/awt-skill
+claude plugin install ai-watch-tester@awt
+```
+
+The MCP server needs the Python MCP SDK:
+
+```bash
+pip install "mcp[cli]>=1.0.0"
+```
+
+Verify what got installed:
+
+```bash
+claude plugin details ai-watch-tester@awt
+```
+
+You should see `Skills (1) awt` and `MCP servers (1) awt`.
+
+### Skill only
+
+If you want the skill without the MCP server:
 
 ```bash
 npx skills add ksgisang/awt-skill --skill awt -g
 ```
 
-### Manual Installation
+Or copy it by hand, globally or per project:
 
 ```bash
 git clone https://github.com/ksgisang/awt-skill.git /tmp/awt-skill
-cp -r /tmp/awt-skill/awt ~/.claude/skills/awt
-rm -rf /tmp/awt-skill
-```
-
-### Per-Project Installation
-
-```bash
-git clone https://github.com/ksgisang/awt-skill.git /tmp/awt-skill
-cp -r /tmp/awt-skill/awt .claude/skills/awt
+cp -r /tmp/awt-skill/skills/awt ~/.claude/skills/awt   # or .claude/skills/awt
 rm -rf /tmp/awt-skill
 ```
 
@@ -64,11 +89,11 @@ After installation, the skill auto-triggers on testing-related prompts.
 ### Updating
 
 ```bash
-# Re-run the same install command to get the latest version
-npx skills add ksgisang/awt-skill --skill awt -g -y
+claude plugin update ai-watch-tester@awt          # plugin
+npx skills add ksgisang/awt-skill --skill awt -g -y  # skill only
 ```
 
-For manual installations: `cd ~/.claude/skills/awt && git pull`
+For hand-copied installations: `cd ~/.claude/skills/awt && git pull`
 
 ## Comparison with Other Testing Skills
 
@@ -197,16 +222,25 @@ Scan → Plan → Review → Execute → Heal
 ## Project Structure
 
 ```
-awt-skill/
-├── awt/                        # ← Skill content (installed by npx skills)
-│   ├── SKILL.md                # Main skill definition
-│   ├── references/
-│   │   ├── scenario-schema.md  # Full YAML schema reference
-│   │   ├── cli-reference.md    # CLI command reference
-│   │   └── config-reference.md # Configuration options
-│   └── templates/
-│       ├── scenario-template.yaml
-│       └── config-template.yaml
+awt-skill/                      # ← this repository is the plugin folder
+├── .claude-plugin/
+│   ├── plugin.json             # Plugin manifest
+│   └── marketplace.json        # Marketplace entry for this one plugin
+├── .mcp.json                   # Declares the bundled MCP server
+├── skills/
+│   └── awt/                    # ← Skill content (installed by npx skills)
+│       ├── SKILL.md            # Main skill definition
+│       ├── references/
+│       │   ├── scenario-schema.md  # Full YAML schema reference
+│       │   ├── cli-reference.md    # CLI command reference
+│       │   └── config-reference.md # Configuration options
+│       └── templates/
+│           ├── scenario-template.yaml
+│           └── config-template.yaml
+├── mcp/
+│   ├── server.py               # MCP server — the 12 aat_* tools
+│   └── requirements.txt
+├── server.json                 # MCP Registry entry
 ├── README.md
 ├── LICENSE
 ├── CONTRIBUTING.md
@@ -252,6 +286,50 @@ playwright install chromium
 ```
 
 After install, run `aat doctor` to verify everything works.
+
+**OCR language packs.** Tesseract installs English only. If you test an app in
+another language, install that language's pack too — otherwise text assertions
+that fall back to OCR report `not visible on page` for text that is plainly
+there. `aat doctor` names any missing pack.
+
+```bash
+brew install tesseract-lang                 # macOS, all languages
+sudo apt install tesseract-ocr-kor          # Linux, one language
+```
+
+## What this plugin runs, sends, and fetches
+
+Everything below is in this repository in readable source. Nothing is minified,
+compiled, or downloaded at install time.
+
+**Runs on your machine.** `mcp/server.py` starts under `python3` and does one
+thing: it builds an argument list and runs the `aat` command you installed with
+`pip install aat-devqa`, as a subprocess. It never runs a shell, so nothing it
+receives is re-parsed as a command. `aat` in turn drives a local Chromium
+through Playwright and, for OCR, the local `tesseract` binary.
+
+**Writes to disk.** Under your project: `.aat/` (config, run history,
+screenshots, the SQLite learning database, the append-only audit log) and
+`reports/`. Under your home directory: `~/.awt/templates/<host>/` for the
+element images AWT saves so it can find a target again after a selector breaks.
+
+**Sends over the network.** Two destinations, both only when you ask for them:
+
+- **The site you are testing.** Chromium loads the URL in your scenario. That
+  is the whole point of the tool, and no other site is contacted by a test run.
+- **An AI provider, only for the commands that need one** — `aat generate`,
+  `aat loop`, `aat devqa`, and Vision matching. The request carries the page
+  text or screenshot and your scenario. You choose the provider and supply the
+  key; with Ollama the request never leaves your machine. Plain `aat run`
+  contacts no AI provider at all.
+
+**Fetches at runtime.** Nothing. The plugin downloads no code after install.
+
+**Approval.** `aat run` asks for confirmation by reading `/dev/tty` directly,
+so a piped stdin cannot answer for you, and every attempt is recorded in
+`.aat/audit.log`. There is no `--auto-approve` flag and no way for an AI agent
+to supply the approval on your behalf. Scenario edits that an AI proposes are
+not written to your files in the default `manual` mode.
 
 ## Links
 

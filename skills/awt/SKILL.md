@@ -1,6 +1,6 @@
 ---
 name: awt
-version: 1.5.0
+version: 1.8.0
 description: AI-powered E2E web app testing with self-healing DevQA loop. Generate test scenarios from URLs or natural language, execute with Playwright, auto-fix failures. Supports YAML scenarios, visual matching (OpenCV + OCR), pattern learning. Use for QA, bug detection, regression testing.
 ---
 

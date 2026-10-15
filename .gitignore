@@ -1,2 +1,5 @@
 PyPI-Recovery-Codes-*
 .mcpregistry_*_token
+__pycache__/
+*.pyc
+.mcpb-cache/

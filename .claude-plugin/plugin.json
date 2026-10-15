@@ -1,0 +1,22 @@
+{
+  "name": "ai-watch-tester",
+  "displayName": "AWT — AI Watch Tester",
+  "description": "End-to-end web testing your AI coding tool can drive: scan a URL, write YAML scenarios, run them in a real browser, and get screenshots, PDF reports, and visual diffs back. Finds its own targets again when a selector breaks.",
+  "version": "1.8.0",
+  "author": {
+    "name": "AILoopLab",
+    "email": "ksgisang@gmail.com",
+    "url": "https://github.com/ksgisang"
+  },
+  "homepage": "https://github.com/ksgisang/AI-Watch-Tester",
+  "repository": "https://github.com/ksgisang/awt-skill",
+  "license": "AGPL-3.0-only",
+  "keywords": [
+    "e2e-testing",
+    "playwright",
+    "qa-automation",
+    "regression-testing",
+    "visual-regression",
+    "web-testing"
+  ]
+}
