@@ -313,8 +313,16 @@ screenshots, the SQLite learning database, the append-only audit log) and
 `reports/`. Under your home directory: `~/.awt/templates/<host>/` for the
 element images AWT saves so it can find a target again after a selector breaks.
 
-**Sends over the network.** Two destinations, both only when you ask for them:
+**Sends over the network.** There is no telemetry and no analytics. Every
+destination below is either one you named yourself or the single call AWT makes
+on its own, which is listed first so it is not buried:
 
+- **`api.github.com`, once a day, by AWT itself.** The CLI asks for the latest
+  release so it can print a hint when a newer one exists. No request body, no
+  account, no machine id, no version string, nothing about what you are
+  testing; the request is identical for every user. It times out after 3
+  seconds and every failure is swallowed, so blocking the host breaks nothing.
+  This is the only call AWT initiates.
 - **The site you are testing.** Chromium loads the URL in your scenario. That
   is the whole point of the tool, and no other site is contacted by a test run.
 - **An AI provider, only for the commands that need one** — `aat generate`,
@@ -322,6 +330,16 @@ element images AWT saves so it can find a target again after a selector breaks.
   text or screenshot and your scenario. You choose the provider and supply the
   key; with Ollama the request never leaves your machine. Plain `aat run`
   contacts no AI provider at all.
+- **A URL you typed, to check it is reachable** — `aat doctor` and `aat start`
+  request the address you gave them and report whether it answered.
+- **`http://localhost:<port>`, to find your dev server** — `aat devqa` probes
+  local ports only.
+- **Any endpoint written into your own scenario.** A `teardown` step of type
+  `api_call` calls exactly the URL you put in the YAML, which is how test data
+  gets cleaned up after a run.
+
+[PRIVACY.md](https://github.com/ksgisang/AI-Watch-Tester/blob/main/PRIVACY.md)
+names the file and line behind each of these.
 
 **Fetches at runtime.** Nothing. The plugin downloads no code after install.
 
