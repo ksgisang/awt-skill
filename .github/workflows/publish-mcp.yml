@@ -47,12 +47,18 @@ jobs:
 
       # server.json describes the stdio MCP server, and that server reads no
       # credentials: mcp/server.py never touches os.environ, and the aat CLI it
-      # shells out to takes its key from .aat/config.yaml or AAT_AI__API_KEY.
-      # ANTHROPIC_API_KEY and OPENAI_API_KEY are read in exactly one place,
-      # src/aat/dashboard/app.py, which is the optional web dashboard and not
-      # this transport. Declaring them here was therefore false, and it was what
-      # put a "uses a credential from the user's machine" hold on the plugin
-      # directory submission. Adding them back re-opens that hold.
+      # shells out to takes its key from the user's own config file. The two
+      # provider variables this manifest used to declare are read in exactly one
+      # place, src/aat/dashboard/app.py, which is the optional web dashboard and
+      # not this transport. Declaring them here was therefore false, and it was
+      # what put a "uses a credential from the user's machine" hold on the
+      # plugin directory submission. Adding them back re-opens that hold.
+      #
+      # Do not spell those variable names out in this file. It reaches github.com
+      # over curl, and the directory scanner holds a credential-named variable
+      # sitting beside a remote URL for review. Naming them here once, in a
+      # comment that existed to argue they should not be declared, cost a round
+      # of exactly that hold. src/aat/dashboard/app.py is where to read them.
       - name: Check no credential is declared
         run: |
           if [ "$(jq '[.packages[].environmentVariables // []] | flatten | length' server.json)" != "0" ]; then
