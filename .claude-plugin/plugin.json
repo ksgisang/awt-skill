@@ -3,6 +3,7 @@
   "displayName": "AWT — AI Watch Tester",
   "description": "End-to-end web testing your AI coding tool can drive: scan a URL, write YAML scenarios, run them in a real browser, and get screenshots, PDF reports, and visual diffs back. Finds its own targets again when a selector breaks.",
   "version": "1.8.0",
+  "icon": "./assets/icon.png",
   "author": {
     "name": "AILoopLab",
     "email": "ksgisang@gmail.com",
