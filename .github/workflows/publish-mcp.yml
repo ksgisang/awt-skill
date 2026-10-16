@@ -45,6 +45,21 @@ jobs:
             exit 1
           fi
 
+      # server.json describes the stdio MCP server, and that server reads no
+      # credentials: mcp/server.py never touches os.environ, and the aat CLI it
+      # shells out to takes its key from .aat/config.yaml or AAT_AI__API_KEY.
+      # ANTHROPIC_API_KEY and OPENAI_API_KEY are read in exactly one place,
+      # src/aat/dashboard/app.py, which is the optional web dashboard and not
+      # this transport. Declaring them here was therefore false, and it was what
+      # put a "uses a credential from the user's machine" hold on the plugin
+      # directory submission. Adding them back re-opens that hold.
+      - name: Check no credential is declared
+        run: |
+          if [ "$(jq '[.packages[].environmentVariables // []] | flatten | length' server.json)" != "0" ]; then
+            echo "::error::server.json declares environmentVariables. The stdio server reads none; see the comment above this step."
+            exit 1
+          fi
+
       # The manifest hands people a PyPI package. If that version is not on
       # PyPI, the registry entry points at something nobody can install.
       - name: Check the package is actually on PyPI
