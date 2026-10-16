@@ -21,7 +21,7 @@
     "type": "git",
     "url": "https://github.com/ksgisang/awt-skill.git"
   },
-  "license": "AGPL-3.0",
+  "license": "AGPL-3.0-only",
   "author": "AILoopLab <ksgisang@gmail.com>",
   "files": [
     ".claude-plugin/",

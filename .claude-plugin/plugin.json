@@ -12,6 +12,10 @@
   "homepage": "https://github.com/ksgisang/AI-Watch-Tester",
   "repository": "https://github.com/ksgisang/awt-skill",
   "license": "AGPL-3.0-only",
+  "documentationUrl": "https://github.com/ksgisang/AI-Watch-Tester/blob/main/docs/QUICK_START.md",
+  "supportUrl": "https://github.com/ksgisang/AI-Watch-Tester/issues",
+  "privacyPolicyUrl": "https://github.com/ksgisang/AI-Watch-Tester/blob/main/PRIVACY.md",
+  "termsOfServiceUrl": "https://github.com/ksgisang/AI-Watch-Tester/blob/main/LICENSE",
   "keywords": [
     "e2e-testing",
     "playwright",
